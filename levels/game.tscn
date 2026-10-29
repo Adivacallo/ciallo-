@@ -1,0 +1,163 @@
+[gd_scene format=3 uid="uid://bpl6ujoo637c4"]
+
+[ext_resource type="PackedScene" path="res://levels/world_main.tscn" id="2_wm"]
+[ext_resource type="PackedScene" uid="uid://dygr0yxoakok2" path="res://player/player.tscn" id="4_player"]
+[ext_resource type="PackedScene" path="res://levels/hud.tscn" id="5_hud"]
+
+[sub_resource type="GDScript" id="GDScript_1_game"]
+script/source = "extends Node2D
+## 单世界关卡:不再加载平行世界;任何时候按 + 直接前往火雨房间。
+
+const FIRE_ROOM := \"res://levels/fire_room.tscn\"
+const WALK_IN_START_X := 40.0
+const WALK_IN_SPEED := 120.0
+
+@onready var world: Node2D = $WorldMain
+@onready var player: CharacterBody2D = $Player
+@onready var dim_label: Label = $DimLabel
+@onready var flash: ColorRect = $Flash
+
+var _leaving := false
+
+
+func _ready() -> void:
+	var w_player := world.get_node_or_null(\"Player\")
+	if w_player != null:
+		var cam := w_player.get_node_or_null(\"Camera2D\")
+		if cam != null:
+			cam.enabled = false
+		w_player.queue_free()
+	var w_hud := world.get_node_or_null(\"HUD\")
+	if w_hud != null:
+		w_hud.queue_free()
+	_start_opening_walk_in()
+	if dim_label != null:
+		dim_label.text = \"[+] 直接前往火雨房间\"
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not (event is InputEventKey):
+		return
+	var key := event as InputEventKey
+	if not key.pressed or key.echo:
+		return
+	if key.keycode == KEY_EQUAL or key.unicode == 43 or key.physical_keycode == KEY_KP_ADD:
+		_jump_to_fire()
+
+
+func _jump_to_fire() -> void:
+	if _leaving:
+		return
+	_leaving = true
+	get_viewport().set_input_as_handled()
+	_play_flash()
+	await get_tree().create_timer(0.3).timeout
+	get_tree().change_scene_to_file(FIRE_ROOM)
+
+
+func _start_opening_walk_in() -> void:
+	var spawn := world.get_node_or_null(\"PlayerSpawn\") as Node2D
+	if spawn == null:
+		return
+	var ground_y := _ground_y_at(world, WALK_IN_START_X)
+	var y := spawn.position.y
+	if ground_y != INF:
+		y = ground_y - 1.0
+	player.global_position = Vector2(WALK_IN_START_X, y)
+	var hint := get_node_or_null(\"HUD/CombatHint\") as CanvasItem
+	if hint != null:
+		hint.visible = false
+	if player.has_method(\"begin_walk_in\"):
+		player.call(\"begin_walk_in\", spawn.position.x, WALK_IN_SPEED)
+		_reveal_hint_after_walk_in(hint)
+
+
+func _reveal_hint_after_walk_in(hint: CanvasItem) -> void:
+	if hint == null:
+		return
+	while is_instance_valid(player) and bool(player.get(\"_walk_in_active\")):
+		await get_tree().physics_frame
+	if is_instance_valid(hint):
+		hint.visible = true
+
+
+## 目标世界 x 处最高的可站立表面 y(越小越高)。
+func _ground_y_at(world_node: Node2D, x: float) -> float:
+	var best := INF
+	for child in world_node.get_node(\"Terrain\").get_children():
+		if not (child is StaticBody2D):
+			continue
+		var pos: Vector2 = child.position
+		if child.has_method(\"_points\"):
+			var run: float = child.get(\"run\")
+			var rise: float = child.get(\"rise\")
+			var kind: String = child.get(\"kind\")
+			if x < pos.x or x > pos.x + run:
+				continue
+			var lx := clampf(x - pos.x, 0.0, run)
+			var surface: float = pos.y
+			if kind == \"down\":
+				surface = pos.y - rise + (lx / run) * rise
+			else:
+				surface = pos.y - (lx / run) * rise
+			best = minf(best, surface)
+		else:
+			var sz = child.get(\"size\")
+			if sz == null:
+				continue
+			var half_w: float = sz.x * 0.5
+			if x < pos.x - half_w or x > pos.x + half_w:
+				continue
+			var top: float = pos.y - sz.y * 0.5
+			best = minf(best, top)
+	return best
+
+
+func _play_flash() -> void:
+	if flash == null:
+		return
+	flash.modulate.a = 0.4
+	flash.visible = true
+	var tw := create_tween()
+	tw.tween_property(flash, \"modulate:a\", 0.0, 0.3)
+	tw.tween_callback(func() -> void: flash.visible = false)
+"
+
+[node name="Game" type="Node2D" unique_id=583519321]
+script = SubResource("GDScript_1_game")
+
+[node name="WorldMain" parent="." unique_id=321616509 instance=ExtResource("2_wm")]
+
+[node name="Player" parent="." unique_id=1676430825 instance=ExtResource("4_player")]
+position = Vector2(220, 600)
+camera_limits = Rect2(0, 80, 12200, 660)
+
+[node name="HUD" parent="." unique_id=839980293 instance=ExtResource("5_hud")]
+
+[node name="DimLabel" type="Label" parent="." unique_id=247137940]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 8.0
+offset_right = 220.0
+offset_bottom = 38.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.45, 0.9, 1, 0.9)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.7)
+theme_override_constants/shadow_offset_y = 2
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 17
+text = "[+] 直接前往火雨房间"
+horizontal_alignment = 1
+
+[node name="Flash" type="ColorRect" parent="." unique_id=274461800]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.6, 0.9, 1, 1)

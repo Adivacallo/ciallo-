@@ -1,0 +1,1049 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://main.gd" id="1_lquwl"]
+[ext_resource type="Texture2D" path="res://levels/npc/deepseek_girl/idle.png" id="2_7mycd"]
+[ext_resource type="SpriteFrames" path="res://player/red_frames.tres" id="3_272bh"]
+[ext_resource type="Script" path="res://scripts/ui/cyber_box.gd" id="4_5vw27"]
+[ext_resource type="Shader" path="res://shaders/scanlines.gdshader" id="5_kek77"]
+
+[sub_resource type="Gradient" id="Gradient_shade"]
+offsets = PackedFloat32Array(0, 0.28, 0.72, 1)
+colors = PackedColorArray(0, 0, 0, 0.72, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.62)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_shade"]
+gradient = SubResource("Gradient_shade")
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="Gradient" id="Gradient_violet"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(0.65, 0.35, 1, 0.2, 0.4, 0.2, 0.9, 0.07, 0.2, 0.1, 0.6, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_violet"]
+gradient = SubResource("Gradient_violet")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lquwl"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7mycd"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_272bh"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5vw27"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kek77"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4c57u"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_efxa6"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(768, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dg77c"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(896, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ycdy4"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(1024, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w48qg"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(1152, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vivmo"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(1280, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2cqfq"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(1408, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yaehf"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(1536, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_074og"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(1664, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cegan"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(1792, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_82xsv"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(1920, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_getpj"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(2048, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ryguw"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(2176, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d13ii"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(2304, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1u8w0"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(2432, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0odxb"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(2560, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lswn8"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(2688, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a6jrf"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(2816, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xuqvo"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(2944, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qsp4k"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(3072, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kq58d"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(3200, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_seu75"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(3328, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_htxhm"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(3456, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jq2sk"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(3584, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4k2k6"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(3712, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0rl1p"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(3840, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ok6jj"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(3968, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_facbu"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(4096, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b1qrp"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(4224, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_come4"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(4352, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h8e4i"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(4480, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4lmeg"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(4608, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0cp0l"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(4736, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d2t1y"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(4864, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gngh3"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(4992, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0n3wm"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(5120, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qnost"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(5248, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wnkbs"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(5376, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f6a44"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(5504, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0cbny"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(5632, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hrvbo"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(5760, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uypp3"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(5888, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_blkrb"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(6016, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_abqjc"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(6144, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6iyjs"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(6272, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4w656"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(6400, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e71vb"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(6528, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rnkwl"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(6656, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vke2r"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(6784, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uit24"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(6912, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ruth0"]
+atlas = ExtResource("2_7mycd")
+region = Rect2(7040, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rm4vd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lquwl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7mycd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_272bh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5vw27")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kek77")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4c57u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_efxa6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dg77c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ycdy4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w48qg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vivmo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2cqfq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yaehf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_074og")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cegan")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_82xsv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_getpj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ryguw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d13ii")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1u8w0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0odxb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lswn8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a6jrf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xuqvo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qsp4k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kq58d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_seu75")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_htxhm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jq2sk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4k2k6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0rl1p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ok6jj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_facbu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b1qrp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_come4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h8e4i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4lmeg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0cp0l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d2t1y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gngh3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0n3wm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qnost")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wnkbs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f6a44")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0cbny")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hrvbo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uypp3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_blkrb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_abqjc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6iyjs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4w656")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e71vb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rnkwl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vke2r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uit24")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ruth0")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 20.0
+}]
+
+[sub_resource type="SystemFont" id="SystemFont_ui"]
+font_names = PackedStringArray("Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", "PingFang SC", "WenQuanYi Micro Hei", "SimHei")
+subpixel_positioning = 0
+
+[sub_resource type="Gradient" id="Gradient_glow"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(0.35, 0.95, 1, 0.22, 0.2, 0.7, 1, 0.08, 0.1, 0.4, 0.8, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_glow"]
+gradient = SubResource("Gradient_glow")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="SystemFont" id="SystemFont_bold"]
+font_names = PackedStringArray("Microsoft YaHei UI", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", "PingFang SC", "WenQuanYi Micro Hei", "SimHei")
+font_weight = 700
+subpixel_positioning = 0
+
+[sub_resource type="StyleBox" id="CyberBox_panel"]
+resource_local_to_scene = false
+resource_name = ""
+content_margin_left = 30.0
+content_margin_top = 18.0
+content_margin_right = 30.0
+content_margin_bottom = 18.0
+script = ExtResource("4_5vw27")
+
+[sub_resource type="StyleBox" id="CyberBox_btn_n"]
+resource_local_to_scene = false
+resource_name = ""
+content_margin_left = 36.0
+content_margin_top = 10.0
+content_margin_right = 36.0
+content_margin_bottom = 10.0
+script = ExtResource("4_5vw27")
+
+[sub_resource type="StyleBox" id="CyberBox_btn_p"]
+resource_local_to_scene = false
+resource_name = ""
+content_margin_left = 36.0
+content_margin_top = 10.0
+content_margin_right = 36.0
+content_margin_bottom = 10.0
+script = ExtResource("4_5vw27")
+
+[sub_resource type="StyleBox" id="CyberBox_btn_h"]
+resource_local_to_scene = false
+resource_name = ""
+content_margin_left = 36.0
+content_margin_top = 10.0
+content_margin_right = 36.0
+content_margin_bottom = 10.0
+script = ExtResource("4_5vw27")
+
+[sub_resource type="StyleBox" id="CyberBox_btn_f"]
+resource_local_to_scene = false
+resource_name = ""
+content_margin_left = 36.0
+content_margin_top = 10.0
+content_margin_right = 36.0
+content_margin_bottom = 10.0
+script = ExtResource("4_5vw27")
+
+[sub_resource type="StyleBox" id="CyberBox_exit_n"]
+resource_local_to_scene = false
+resource_name = ""
+content_margin_left = 36.0
+content_margin_top = 10.0
+content_margin_right = 36.0
+content_margin_bottom = 10.0
+script = ExtResource("4_5vw27")
+
+[sub_resource type="StyleBox" id="CyberBox_exit_p"]
+resource_local_to_scene = false
+resource_name = ""
+content_margin_left = 36.0
+content_margin_top = 10.0
+content_margin_right = 36.0
+content_margin_bottom = 10.0
+script = ExtResource("4_5vw27")
+
+[sub_resource type="StyleBox" id="CyberBox_exit_h"]
+resource_local_to_scene = false
+resource_name = ""
+content_margin_left = 36.0
+content_margin_top = 10.0
+content_margin_right = 36.0
+content_margin_bottom = 10.0
+script = ExtResource("4_5vw27")
+
+[sub_resource type="StyleBox" id="CyberBox_exit_f"]
+resource_local_to_scene = false
+resource_name = ""
+content_margin_left = -1.0
+content_margin_top = -1.0
+content_margin_right = -1.0
+content_margin_bottom = -1.0
+script = ExtResource("4_5vw27")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_scan"]
+shader = ExtResource("5_kek77")
+shader_parameter/line_spacing = 4.0
+shader_parameter/line_density = 0.32
+shader_parameter/vignette_strength = 0.55
+shader_parameter/flicker_strength = 0.02
+shader_parameter/flicker_speed = 18.0
+
+[node name="@Control@207" type="Control" unique_id=335826528]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lquwl")
+metadata/scene_file_path = "res://main.tscn"
+metadata/_tc_uuid = "3490496512527850246"
+
+[node name="Darken" type="ColorRect" parent="." unique_id=328008952]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.01, 0.01, 0.05, 0.62)
+metadata/_tc_uuid = "6277261232063864369"
+
+[node name="EdgeShade" type="TextureRect" parent="." unique_id=1599871602]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_shade")
+expand_mode = 1
+metadata/_tc_uuid = "1072365839206912021"
+
+[node name="VioletGlow" type="TextureRect" parent="." unique_id=1680711364]
+modulate = Color(0.55, 0.85, 1, 1)
+layout_mode = 1
+offset_top = 180.0
+offset_right = 560.0
+offset_bottom = 720.0
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_violet")
+expand_mode = 1
+metadata/_tc_uuid = "945616142413955106"
+
+[node name="VioletPreview" type="AnimatedSprite2D" parent="." unique_id=799368219]
+unique_name_in_owner = true
+texture_filter = 1
+position = Vector2(270, 610)
+scale = Vector2(1.5, 1.5)
+sprite_frames = SubResource("SpriteFrames_rm4vd")
+animation = &"idle"
+frame_progress = 0.6952384
+offset = Vector2(0, -56)
+metadata/_tc_uuid = "7035790538720676868"
+
+[node name="VioletBase" type="ColorRect" parent="." unique_id=188188973]
+layout_mode = 1
+offset_left = 190.0
+offset_top = 610.0
+offset_right = 350.0
+offset_bottom = 612.0
+mouse_filter = 2
+color = Color(0.3, 0.65, 1, 0.3)
+metadata/_tc_uuid = "1910218825851934453"
+
+[node name="VioletBaseCore" type="ColorRect" parent="." unique_id=429547958]
+layout_mode = 1
+offset_left = 230.0
+offset_top = 610.0
+offset_right = 310.0
+offset_bottom = 611.0
+mouse_filter = 2
+color = Color(0.7, 0.95, 1, 0.6)
+metadata/_tc_uuid = "8920280852809694727"
+
+[node name="VioletLabel" type="Label" parent="." unique_id=2131640747]
+layout_mode = 1
+offset_left = 150.0
+offset_top = 620.0
+offset_right = 390.0
+offset_bottom = 642.0
+theme_override_colors/font_color = Color(0.7, 0.92, 1, 0.6)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 11
+text = "SUBJECT // DEEPSEEK"
+horizontal_alignment = 1
+metadata/_tc_uuid = "2800740229881021638"
+
+[node name="CharacterGlow" type="TextureRect" parent="." unique_id=1384931516]
+modulate = Color(0.7, 1, 1, 1)
+layout_mode = 1
+offset_left = 740.0
+offset_top = 200.0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_glow")
+expand_mode = 1
+metadata/_tc_uuid = "6102953595911250851"
+
+[node name="CharacterPreview" type="AnimatedSprite2D" parent="." unique_id=1519417976]
+texture_filter = 1
+position = Vector2(1010, 610)
+scale = Vector2(4, 4)
+sprite_frames = ExtResource("3_272bh")
+animation = &"idle"
+autoplay = "idle"
+frame_progress = 0.38365066
+offset = Vector2(0, -23)
+flip_h = true
+metadata/_tc_uuid = "2391150103803664829"
+
+[node name="CharacterBase" type="ColorRect" parent="." unique_id=2107017007]
+layout_mode = 1
+offset_left = 920.0
+offset_top = 610.0
+offset_right = 1120.0
+offset_bottom = 612.0
+mouse_filter = 2
+color = Color(0.2, 0.8, 1, 0.3)
+metadata/_tc_uuid = "3789379129029633014"
+
+[node name="CharacterBaseCore" type="ColorRect" parent="." unique_id=861969265]
+layout_mode = 1
+offset_left = 970.0
+offset_top = 610.0
+offset_right = 1060.0
+offset_bottom = 611.0
+mouse_filter = 2
+color = Color(0.6, 1, 1, 0.6)
+metadata/_tc_uuid = "3749777806646657269"
+
+[node name="CharacterLabel" type="Label" parent="." unique_id=1228380690]
+layout_mode = 1
+offset_left = 860.0
+offset_top = 620.0
+offset_right = 1160.0
+offset_bottom = 642.0
+theme_override_colors/font_color = Color(0.6, 0.9, 1, 0.6)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 11
+text = "OFFICER // RED"
+horizontal_alignment = 1
+metadata/_tc_uuid = "4114572338671383937"
+
+[node name="SystemTag" type="Label" parent="." unique_id=202409574]
+layout_mode = 1
+offset_left = 26.0
+offset_top = 22.0
+offset_right = 560.0
+offset_bottom = 44.0
+theme_override_colors/font_color = Color(0.5, 0.85, 1, 0.55)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 11
+text = "DIMENSION POLICE // TERMINAL 07"
+metadata/_tc_uuid = "1023312546104546112"
+
+[node name="StatusTag" type="Label" parent="." unique_id=791038979]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -250.0
+offset_top = 22.0
+offset_right = -26.0
+offset_bottom = 44.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(0.4, 1, 0.75, 0.65)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 11
+text = "● LINK STABLE"
+horizontal_alignment = 2
+metadata/_tc_uuid = "2017312671577640450"
+
+[node name="TitleBlock" type="VBoxContainer" parent="." unique_id=1779858302]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 42.0
+offset_bottom = 323.0
+grow_horizontal = 2
+theme_override_constants/separation = 8
+alignment = 1
+metadata/_tc_uuid = "3051979003088036441"
+
+[node name="Title" type="RichTextLabel" parent="TitleBlock" unique_id=1364519544]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 74)
+layout_mode = 2
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.3, 0.85, 1, 0.6)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/shadow_offset_y = 3
+theme_override_constants/outline_size = 10
+theme_override_fonts/normal_font = SubResource("SystemFont_bold")
+theme_override_font_sizes/normal_font_size = 42
+bbcode_enabled = true
+text = "[center][color=#ff3366]BUG[/color]  [color=#00ffff]修复大作战[/color][/center]"
+fit_content = true
+scroll_active = false
+metadata/_tc_uuid = "1361665459351364390"
+
+[node name="Subtitle" type="Label" parent="TitleBlock" unique_id=920157376]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.95, 1, 0.95)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 21
+text = "维度修复局 · BUG 清除行动"
+horizontal_alignment = 1
+metadata/_tc_uuid = "1533667041103094769"
+
+[node name="Tagline" type="Label" parent="TitleBlock" unique_id=1352794878]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.68, 0.88, 0.95)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 15
+text = "一场必须亲手打完的 BUG 战争。"
+horizontal_alignment = 1
+autowrap_mode = 2
+metadata/_tc_uuid = "8917326063400228376"
+
+[node name="TitleRule" type="Label" parent="TitleBlock" unique_id=26904127]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 1, 0.45)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 12
+text = "——  ◆  ——"
+horizontal_alignment = 1
+metadata/_tc_uuid = "6542772320113025962"
+
+[node name="MenuPanel" type="PanelContainer" parent="." unique_id=1792883466]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -235.0
+offset_top = -70.0
+offset_right = 235.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("CyberBox_panel")
+metadata/_tc_uuid = "1441734641848856109"
+
+[node name="MenuLayout" type="VBoxContainer" parent="MenuPanel" unique_id=1874206377]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+metadata/_tc_uuid = "1276918854453057626"
+
+[node name="PanelHeader" type="Label" parent="MenuPanel/MenuLayout" unique_id=908835926]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.9, 1, 0.6)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 11
+text = "SYSTEM // MAIN MENU"
+metadata/_tc_uuid = "6461961813736317211"
+
+[node name="PanelRule" type="ColorRect" parent="MenuPanel/MenuLayout" unique_id=830323077]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+color = Color(0.25, 0.85, 1, 0.35)
+metadata/_tc_uuid = "7310434873826469298"
+
+[node name="Buttons" type="VBoxContainer" parent="MenuPanel/MenuLayout" unique_id=131507328]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+metadata/_tc_uuid = "3225787269916851511"
+
+[node name="StartButton" type="Button" parent="MenuPanel/MenuLayout/Buttons" unique_id=1131068931]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(330, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.9, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = SubResource("SystemFont_bold")
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("CyberBox_btn_n")
+theme_override_styles/pressed = SubResource("CyberBox_btn_p")
+theme_override_styles/hover = SubResource("CyberBox_btn_h")
+theme_override_styles/focus = SubResource("CyberBox_btn_f")
+text = "> 开始游戏"
+metadata/_tc_uuid = "3115855934048918914"
+
+[node name="SettingsButton" type="Button" parent="MenuPanel/MenuLayout/Buttons" unique_id=1432477435]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(330, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.9, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = SubResource("SystemFont_bold")
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("CyberBox_btn_n")
+theme_override_styles/pressed = SubResource("CyberBox_btn_p")
+theme_override_styles/hover = SubResource("CyberBox_btn_h")
+theme_override_styles/focus = SubResource("CyberBox_btn_f")
+text = "设置"
+metadata/_tc_uuid = "9179316225465681513"
+
+[node name="QuitButton" type="Button" parent="MenuPanel/MenuLayout/Buttons" unique_id=1139958172]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(330, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.78, 0.84, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9, 0.93, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = SubResource("SystemFont_bold")
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("CyberBox_exit_n")
+theme_override_styles/pressed = SubResource("CyberBox_exit_p")
+theme_override_styles/hover = SubResource("CyberBox_exit_h")
+theme_override_styles/focus = SubResource("CyberBox_exit_f")
+text = "退出"
+metadata/_tc_uuid = "1786575608458982467"
+
+[node name="PanelFooter" type="Label" parent="MenuPanel/MenuLayout" unique_id=1565710684]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.55, 0.75, 0.65)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 10
+text = "CASE 07 // DIMENSION BREACH"
+horizontal_alignment = 1
+metadata/_tc_uuid = "2580491625142082684"
+
+[node name="HintLabel" type="Label" parent="." unique_id=1560527757]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -240.0
+offset_top = -42.0
+offset_right = 240.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.58, 0.66, 0.85, 0.65)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 12
+text = "↑↓ 选择 // ENTER 确认 // ESC 退出"
+horizontal_alignment = 1
+metadata/_tc_uuid = "3800850753975117195"
+
+[node name="VersionLabel" type="Label" parent="." unique_id=1459410909]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 22.0
+offset_top = -42.0
+offset_right = 340.0
+offset_bottom = -20.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.55, 0.6, 0.85, 0.55)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 11
+text = "VER 0.1.0 // 开发预览"
+metadata/_tc_uuid = "3632402066759410541"
+
+[node name="CopyrightLabel" type="Label" parent="." unique_id=1531809925]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -380.0
+offset_top = -42.0
+offset_right = -22.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.55, 0.6, 0.85, 0.55)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 11
+text = "© 2077 维度执法局 // DIMENSION POLICE"
+horizontal_alignment = 2
+metadata/_tc_uuid = "623284223087282032"
+
+[node name="ScanlineOverlay" type="ColorRect" parent="." unique_id=1327827803]
+material = SubResource("ShaderMaterial_scan")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 1.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_tc_uuid = "243733508189710339"
+
+[node name="ToastLabel" type="Label" parent="." unique_id=1229460211]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 60.0
+offset_right = 300.0
+offset_bottom = 96.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.75)
+theme_override_constants/outline_size = 5
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 17
+text = "……"
+horizontal_alignment = 1
+metadata/_tc_uuid = "6671960962755414759"
+
+[node name="ExitScreen" type="Control" parent="." unique_id=168774299]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_tc_uuid = "1987249540444860074"
+
+[node name="ExitBG" type="ColorRect" parent="ExitScreen" unique_id=1575587592]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.008, 0.008, 0.02, 1)
+metadata/_tc_uuid = "8662232683223522687"
+
+[node name="ExitText" type="Label" parent="ExitScreen" unique_id=1324867297]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -52.0
+offset_right = 320.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.2, 0.4, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_colors/font_outline_color = Color(1, 0.2, 0.4, 0.4)
+theme_override_constants/shadow_offset_y = 3
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = SubResource("SystemFont_bold")
+theme_override_font_sizes/font_size = 30
+text = "GOODBYE, OFFICER."
+horizontal_alignment = 1
+metadata/_tc_uuid = "7691491500353062935"
+
+[node name="ExitSub" type="Label" parent="ExitScreen" unique_id=519126175]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -8.0
+offset_right = 320.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.55, 0.6, 0.85, 0.8)
+theme_override_fonts/font = SubResource("SystemFont_ui")
+theme_override_font_sizes/font_size = 14
+text = "// 窗口即将关闭 //"
+horizontal_alignment = 1
+metadata/_tc_uuid = "4919638798672230079"
+
+[node name="ExitBar" type="ColorRect" parent="ExitScreen" unique_id=682408239]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = 32.0
+offset_right = 120.0
+offset_bottom = 34.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(0, 1)
+color = Color(1, 0.2, 0.4, 1)
+metadata/_tc_uuid = "5787550497649978747"
