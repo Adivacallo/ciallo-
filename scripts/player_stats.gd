@@ -22,10 +22,10 @@ const SKILL_COST := 100
 const SKILL_SLOTS := 2
 ## 技能表:加新技能往这里加一行就行(顺序 = 界面上列出的顺序)
 const SKILLS := {
-	"heal": {"name": "回复", "label": "回复：恢复80%血量", "cost": 100},
-	"blaze": {"name": "混沌爆炎", "label": "混沌爆炎：释放高伤害火焰弹", "cost": 100},
-	"tornado": {"name": "龙卷风", "label": "龙卷风：无敌蓄力 2 秒后横扫 3/4 场地", "cost": 100},
-	"blink": {"name": "闪现", "label": "闪现：瞬移半个场地（空中可用 · 每次 10 token · 期间无敌）", "cost": 50},
+	"heal": {"name": "回复", "label": "回复：立刻恢复 80% 血量", "cost": 100},
+	"blaze": {"name": "混沌爆炎", "label": "混沌爆炎：2 秒内 20 发火焰弹，每发 5", "cost": 100},
+	"tornado": {"name": "龙卷风", "label": "龙卷风：蓄力 2 秒无敌，横扫 3/4 场地（250）", "cost": 100},
+	"blink": {"name": "闪现", "label": "闪现：瞬移半个场地，每次 10 token，期间无敌", "cost": 50},
 }
 var skill_unlocked := {"heal": false, "blaze": false, "tornado": false, "blink": false}
 ## 已装配的技能(长度 2,空槽是空字符串)。框一 = U,框二 = I

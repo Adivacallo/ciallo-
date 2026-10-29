@@ -138,7 +138,7 @@ func _refresh_state() -> void:
 				carried += 1
 				var slot := int(stats.call("slot_of", key))
 				var slot_index := clampi(slot, 0, SLOT_NAMES.size() - 1)
-				btn.text = "%s（%s · %s｜点击卸下）" % [
+				btn.text = "%s（%s · %s）" % [
 					label, SLOT_NAMES[slot_index], SLOT_HOTKEYS[slot_index]]
 				btn.disabled = false
 			_:
@@ -146,8 +146,7 @@ func _refresh_state() -> void:
 					btn.text = "%s（两个框都满了）" % label
 					btn.disabled = true
 				else:
-					btn.text = "%s（点击装进%s · %s）" % [
-						label, SLOT_NAMES[free_slot], SLOT_HOTKEYS[free_slot]]
+					btn.text = "%s（点击装进%s）" % [label, SLOT_NAMES[free_slot]]
 					btn.disabled = false
 
 	_state_label.text = "// 已解锁 %d / %d · 已携带 %d / 2 · 持有 %d token" % [

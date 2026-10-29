@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bqhwed520sq7b"
-path="res://.godot/imported/screenshot_skill_blink.png-b65ae51c2f157c8b249f556b42888e7c.ctex"
+uid="uid://dwog3ho7uavto"
+path="res://.godot/imported/screenshot_skill_screen.png-581afbcb54064b84908bcf6ca9e4f6a9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://screenshot_skill_blink.png"
-dest_files=["res://.godot/imported/screenshot_skill_blink.png-b65ae51c2f157c8b249f556b42888e7c.ctex"]
+source_file="res://screenshot_skill_screen.png"
+dest_files=["res://.godot/imported/screenshot_skill_screen.png-581afbcb54064b84908bcf6ca9e4f6a9.ctex"]
 
 [params]
 
