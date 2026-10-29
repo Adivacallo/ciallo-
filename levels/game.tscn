@@ -11,6 +11,8 @@ script/source = "extends Node2D
 const FIRE_ROOM := \"res://levels/fire_room.tscn\"
 const WALK_IN_START_X := 40.0
 const WALK_IN_SPEED := 120.0
+## 第一个房间的小怪被击败后多少秒原地刷新
+const ENEMY_RESPAWN_SECONDS := 10.0
 
 @onready var world: Node2D = $WorldMain
 @onready var player: CharacterBody2D = $Player
@@ -30,9 +32,17 @@ func _ready() -> void:
 	var w_hud := world.get_node_or_null(\"HUD\")
 	if w_hud != null:
 		w_hud.queue_free()
+	_setup_enemy_respawn()
 	_start_opening_walk_in()
 	if dim_label != null:
 		dim_label.text = \"[+] 直接前往火雨房间\"
+
+
+## 第一个房间的小怪被击败后 10 秒原地刷新。
+func _setup_enemy_respawn() -> void:
+	for node in world.find_children(\"*\", \"\", true, false):
+		if node.is_in_group(\"enemy\") and \"respawn_seconds\" in node:
+			node.set(\"respawn_seconds\", ENEMY_RESPAWN_SECONDS)
 
 
 func _unhandled_input(event: InputEvent) -> void:

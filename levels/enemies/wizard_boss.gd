@@ -9,6 +9,10 @@ signal revived
 const FIRE_PILLAR := preload("res://levels/boss/fire_pillar.tscn")
 const LIGHTNING_STRIKE := preload("res://levels/boss/lightning_strike.tscn")
 const WATER_WAVE := preload("res://levels/boss/water_wave.tscn")
+const BLUE_ORB := preload("res://levels/npc/blue_orb.tscn")
+const MUSHROOM := preload("res://levels/enemies/mushroom.tscn")
+const SPACE_EXPLOSION := preload("res://levels/boss/space_explosion.tscn")
+const FIREBALL := preload("res://levels/boss/fireball.tscn")
 const FRAME_DIR := "res://picture/boss/"
 const FRAME_SIZE := Vector2(64.0, 64.0)
 const BODY_SCALE := Vector2(6.0, 6.0)
@@ -23,8 +27,32 @@ const GROUND_Y := 600.0
 const ROOM_MIN_X := 80.0
 const ROOM_MAX_X := 1072.0
 const ROOM_CENTER_X := 576.0
+## 阶段成长:每次复活后,血量相对上一阶段翻倍、全部技能伤害 +2。
+const PHASE_HP_FACTOR := 2
+const PHASE_DAMAGE_STEP := 2
+## 第 2 阶段起:地面波浪换成「向四周连发 3 轮蓝色火球」。
+const ORB_VOLLEYS := 3
+const ORB_PER_VOLLEY := 12
+const ORB_VOLLEY_GAP := 0.45
+const ORB_DAMAGE := 5
+## 第 3 阶段起:每 30 秒召唤 4 只蘑菇小兵(近战,4 点伤害)。
+const MUSHROOM_SUMMON_PHASE := 2
+const MUSHROOM_SUMMON_INTERVAL := 30.0
+const MUSHROOM_SUMMON_COUNT := 4
+const MUSHROOM_MAX_ALIVE := 12
+## 第 4 阶段起:每 3 秒在场地随机位置引爆一次空间爆炸(4 点伤害)。
+const EXPLOSION_MIN_PHASE := 3
+const EXPLOSION_INTERVAL := 3.0
+## 引爆炸点离房间两侧至少留这么宽,爆炸圈才不会跑到墙外
+const EXPLOSION_MARGIN := 90.0
+## 第 5 阶段:连续 5 发火焰弹射向主角当前位置(基础 8 点伤害)。
+const FIREBALL_MIN_PHASE := 4
+const FIREBALL_SHOTS := 5
+const FIREBALL_GAP := 0.35
+const FIREBALL_DAMAGE := 8
 
-@export var max_health := 300
+## 第 1 阶段的血量(之后每阶段 ×PHASE_HP_FACTOR)。
+@export var base_health := 300
 @export var hover_y := 440.0
 @export var hover_amp := 26.0
 @export var hover_speed := 1.35
@@ -35,6 +63,16 @@ var _active := false
 var _dead := false
 var _revive_locked := false
 var _health := 300
+## 当前阶段的最大血量(_apply_phase_stats 刷新,boss_bar 读这个值)。
+var max_health := 300
+## 0 = 第 1 阶段。
+var _phase := 0
+## 当前阶段额外附加的技能伤害。
+var _damage_bonus := 0
+## 蘑菇召唤倒计时
+var _summon_cd := MUSHROOM_SUMMON_INTERVAL
+## 空间爆炸倒计时
+var _explosion_cd := EXPLOSION_INTERVAL
 var _player: Node2D
 var _time := 0.0
 var _skill_cd := 0.0
@@ -70,11 +108,28 @@ func health_now() -> int:
 	return _health
 
 
+## 当前阶段(从 1 开始),方便别处查进度。
+func phase_now() -> int:
+	return _phase + 1
+
+
+## 按当前阶段套用血量与伤害成长:第 1 阶段保持原样,之后每阶段血量翻倍、伤害 +2。
+func _apply_phase_stats() -> void:
+	var mult := 1
+	for i in _phase:
+		mult *= PHASE_HP_FACTOR
+	max_health = base_health * mult
+	_health = max_health
+	_damage_bonus = PHASE_DAMAGE_STEP * _phase
+	_summon_cd = MUSHROOM_SUMMON_INTERVAL
+	_explosion_cd = EXPLOSION_INTERVAL
+
+
 func become_hostile() -> void:
 	if _dead:
 		return
 	_active = true
-	_health = max_health
+	_apply_phase_stats()
 	_skill_cd = 1.4
 	_skill_step = 0
 	add_to_group("enemy")
@@ -124,6 +179,52 @@ func _physics_process(delta: float) -> void:
 	if _skill_cd <= 0.0:
 		_skill_cd = skill_interval
 		_cast_next_skill()
+	# 第 3 阶段起:每 30 秒召唤 4 只蘑菇小兵
+	if _phase >= MUSHROOM_SUMMON_PHASE:
+		_summon_cd -= delta
+		if _summon_cd <= 0.0:
+			_summon_cd = MUSHROOM_SUMMON_INTERVAL
+			_summon_mushrooms()
+	# 第 4 阶段起:每 3 秒在随机位置引爆一次空间爆炸
+	if _phase >= EXPLOSION_MIN_PHASE:
+		_explosion_cd -= delta
+		if _explosion_cd <= 0.0:
+			_explosion_cd = EXPLOSION_INTERVAL
+			_cast_space_explosion()
+
+
+## 场地随机位置引爆一颗空间爆炸(先预警,炸开时碰到掉 4 点血)。
+func _cast_space_explosion() -> void:
+	var host := get_parent()
+	if host == null:
+		return
+	var x := randf_range(ROOM_MIN_X + EXPLOSION_MARGIN, ROOM_MAX_X - EXPLOSION_MARGIN)
+	var boom := SPACE_EXPLOSION.instantiate()
+	host.add_child(boom)
+	boom.global_position = Vector2(x, GROUND_Y)
+	if boom.has_method("setup"):
+		boom.call("setup", 0.05)
+
+
+## 从场地左右两侧各走进 2 只蘑菇(场上超过上限就先不招)。
+func _summon_mushrooms() -> void:
+	var host := get_parent()
+	if host == null:
+		return
+	var alive := get_tree().get_nodes_in_group("mushroom").size()
+	var budget := mini(MUSHROOM_SUMMON_COUNT, MUSHROOM_MAX_ALIVE - alive)
+	if budget <= 0:
+		return
+	_flash_body(Color(1.0, 0.78, 0.45))
+	for i in budget:
+		var from_left := i % 2 == 0
+		var mush := MUSHROOM.instantiate()
+		host.add_child(mush)
+		mush.global_position = Vector2(
+			ROOM_MIN_X - 46.0 if from_left else ROOM_MAX_X + 46.0,
+			GROUND_Y - 6.0)
+		if mush.has_method("set_move_dir"):
+			mush.call("set_move_dir", 1.0 if from_left else -1.0)
 
 
 func _build_frames() -> void:
@@ -165,13 +266,21 @@ func _cast_next_skill() -> void:
 	if _player == null or not is_instance_valid(_player):
 		return
 	_play(&"attack", true)
-	match _skill_step % 3:
+	# 第 5 阶段起技能循环多一个「火焰弹连射」槽位
+	var slots := 4 if _phase >= FIREBALL_MIN_PHASE else 3
+	match _skill_step % slots:
 		0:
 			_cast_fire()
 		1:
 			_cast_lightning()
+		2:
+			# 第 1 阶段仍是地面波浪;第 2 阶段起换成蓝色火球四散
+			if _phase == 0:
+				_cast_water()
+			else:
+				_cast_orb_burst()
 		_:
-			_cast_water()
+			_cast_fireball_volley()
 	_skill_step += 1
 
 
@@ -183,7 +292,7 @@ func _cast_fire() -> void:
 		var pillar := FIRE_PILLAR.instantiate()
 		get_parent().add_child(pillar)
 		pillar.global_position = Vector2(x, GROUND_Y)
-		pillar.call("setup", 0.55 + float(i) * 0.12)
+		pillar.call("setup", 0.55 + float(i) * 0.12, _damage_bonus)
 
 
 func _cast_lightning() -> void:
@@ -198,7 +307,7 @@ func _cast_lightning() -> void:
 		var lightning := LIGHTNING_STRIKE.instantiate()
 		get_parent().add_child(lightning)
 		lightning.global_position = Vector2(x, GROUND_Y)
-		lightning.call("setup", 0.5 + float(i) * 0.25)
+		lightning.call("setup", 0.5 + float(i) * 0.25, _damage_bonus)
 
 
 func _cast_water() -> void:
@@ -207,7 +316,61 @@ func _cast_water() -> void:
 	var wave := WATER_WAVE.instantiate()
 	get_parent().add_child(wave)
 	wave.global_position = Vector2(-180.0 if from_left else 1332.0, GROUND_Y)
-	wave.call("setup", 1.0 if from_left else -1.0)
+	wave.call("setup", 1.0 if from_left else -1.0, _damage_bonus)
+
+
+## 第 2 阶段起替代水墙:以 Boss 为圆心,向四周连发 3 轮蓝色火球。
+func _cast_orb_burst() -> void:
+	_flash_body(Color(0.5, 0.8, 1.0))
+	for volley in ORB_VOLLEYS:
+		_fire_orb_ring(volley)
+		if volley >= ORB_VOLLEYS - 1:
+			return
+		await get_tree().create_timer(ORB_VOLLEY_GAP).timeout
+		if not is_inside_tree() or _dead:
+			return
+
+
+## 一圈均匀铺开的蓝色火球,每轮错开一点角度。
+func _fire_orb_ring(volley: int) -> void:
+	var step := TAU / float(ORB_PER_VOLLEY)
+	var offset := step * float(volley) / float(ORB_VOLLEYS)
+	var origin := global_position + Vector2(0.0, -12.0)
+	for i in ORB_PER_VOLLEY:
+		var orb := BLUE_ORB.instantiate()
+		get_parent().add_child(orb)
+		orb.global_position = origin
+		orb.call("setup", Vector2.RIGHT.rotated(step * float(i) + offset), ORB_DAMAGE + _damage_bonus)
+
+
+## 第 5 阶段:连续 5 发火焰弹,每一发都瞄准主角当时的位置。
+func _cast_fireball_volley() -> void:
+	_flash_body(Color(1.0, 0.6, 0.25))
+	for shot in FIREBALL_SHOTS:
+		if not is_inside_tree() or _dead:
+			return
+		_fire_one_fireball()
+		_body.position.y = -7.0
+		var kick := create_tween()
+		kick.tween_property(_body, "position:y", 0.0, 0.12)
+		if shot >= FIREBALL_SHOTS - 1:
+			return
+		await get_tree().create_timer(FIREBALL_GAP).timeout
+
+
+func _fire_one_fireball() -> void:
+	if _player == null or not is_instance_valid(_player):
+		return
+	var host := get_parent()
+	if host == null:
+		return
+	var origin := global_position + Vector2(0.0, -48.0)
+	var aim := (_player.global_position + Vector2(0.0, -34.0) - origin).normalized()
+	var ball := FIREBALL.instantiate()
+	host.add_child(ball)
+	ball.global_position = origin
+	if ball.has_method("setup"):
+		ball.call("setup", aim, FIREBALL_DAMAGE + _damage_bonus)
 
 
 func _flash_body(color: Color) -> void:
@@ -276,6 +439,8 @@ func revive() -> void:
 	if _revive_locked or not _dead:
 		return
 	_dead = false
+	# 进入下一阶段:血量翻倍、技能伤害 +2
+	_phase += 1
 	modulate.a = 0.0
 	_body.scale = BODY_SCALE
 	_body.modulate = Color.WHITE

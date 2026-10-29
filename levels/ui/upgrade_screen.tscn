@@ -55,6 +55,54 @@ content_margin_top = 18.0
 content_margin_right = 28.0
 content_margin_bottom = 18.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_opt"]
+bg_color = Color(0.05, 0.11, 0.17, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.9, 1, 0.55)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_opt_hover"]
+bg_color = Color(0.08, 0.28, 0.36, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 1, 1, 0.95)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_opt_off"]
+bg_color = Color(0.06, 0.07, 0.09, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.35, 0.42, 0.6)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 16.0
+content_margin_top = 10.0
+content_margin_right = 16.0
+content_margin_bottom = 10.0
+
 [node name="UpgradeScreen" type="Control"]
 visible = false
 layout_mode = 3
@@ -180,19 +228,79 @@ theme_override_colors/font_color = Color(0.45, 0.95, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "强化项目"
 
-[node name="BodyText" type="Label" parent="Body/Lines"]
+[node name="AttackButton" type="Button" parent="Body/Lines"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.63, 0.72, 0.9)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_opt")
+theme_override_styles/hover = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_opt_off")
+theme_override_styles/focus = SubResource("StyleBoxFlat_opt")
+text = "加强攻击伤害+50%"
+
+[node name="HealthButton" type="Button" parent="Body/Lines"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.63, 0.72, 0.9)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_opt")
+theme_override_styles/hover = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_opt_off")
+theme_override_styles/focus = SubResource("StyleBoxFlat_opt")
+text = "加强血量+50%"
+
+[node name="InvulnButton" type="Button" parent="Body/Lines"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.63, 0.72, 0.9)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_opt")
+theme_override_styles/hover = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_opt_off")
+theme_override_styles/focus = SubResource("StyleBoxFlat_opt")
+text = "加强无敌时间+30%"
+
+[node name="ParryButton" type="Button" parent="Body/Lines"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.63, 0.72, 0.9)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_opt")
+theme_override_styles/hover = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_opt_off")
+theme_override_styles/focus = SubResource("StyleBoxFlat_opt")
+text = "加强弹反范围+30%"
+
+[node name="BodyHint" type="Label" parent="Body/Lines"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.8, 0.88, 0.98, 0.9)
-theme_override_font_sizes/font_size = 15
-text = "这里之后会开放：攻击力 / 防御 / 技能强化，消耗拾取到的 token。"
+theme_override_colors/font_color = Color(0.8, 0.88, 0.98, 0.85)
+theme_override_font_sizes/font_size = 14
+text = "用击杀掉落的 token 强化自身，四条线各自独立升级。"
 
 [node name="BodyTag" type="Label" parent="Body/Lines"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.45, 0.55, 0.75, 0.75)
 theme_override_font_sizes/font_size = 12
-text = "// COMING SOON"
+text = "// 未强化"
 
 [node name="Hint" type="Label" parent="."]
 layout_mode = 1

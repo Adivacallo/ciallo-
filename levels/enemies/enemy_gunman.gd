@@ -20,6 +20,8 @@ const WALL_HEIGHTS: Array[float] = [-14.0, -36.0]
 @export var patrol_range := 220.0
 @export var chase_range := 300.0
 @export var keep_distance := 210.0
+## 被击败后多少秒原地复活;0 表示不复活(第一个房间由关卡统一设成 10 秒)。
+@export var respawn_seconds := 0.0
 
 var _hp := 0
 var _player: Node2D
@@ -34,6 +36,10 @@ var _spawn_set := false
 var _patrol_pause := 0.0
 var _vel_y := 0.0
 var _on_floor := false
+## 复活相关
+var _respawn_pos := Vector2.ZERO
+var _awaiting_respawn := false
+var _respawn_at := 0.0
 
 @onready var _body: AnimatedSprite2D = $Body
 @onready var _hurtbox: Area2D = $Hurtbox
@@ -42,6 +48,7 @@ var _on_floor := false
 func _ready() -> void:
 	add_to_group("enemy")
 	_hp = max_hp
+	_respawn_pos = global_position
 	_cooldown = randf_range(0.7, 1.3)
 	_player = get_tree().get_first_node_in_group("player")
 	_body.sprite_frames = STRIPS.build([
@@ -61,6 +68,7 @@ func _play(anim: StringName, lock := 0.0) -> void:
 
 func _physics_process(delta: float) -> void:
 	if _dead:
+		_maybe_respawn()
 		return
 	if not _spawn_set:
 		_spawn_x = global_position.x
@@ -207,6 +215,7 @@ func _drop_tokens() -> void:
 
 func _die() -> void:
 	_dead = true
+	remove_from_group("enemy")
 	_hurtbox.set_deferred("monitorable", false)
 	_drop_tokens()
 	_play(&"death", 1.5)
@@ -215,4 +224,51 @@ func _die() -> void:
 	tw.set_parallel(true)
 	tw.tween_property(self, "modulate:a", 0.0, 0.3)
 	tw.tween_property(self, "scale", Vector2(0.7, 0.7), 0.3)
-	tw.chain().tween_callback(queue_free)
+	if respawn_seconds > 0.0:
+		tw.chain().tween_callback(_begin_respawn_wait)
+	else:
+		tw.chain().tween_callback(queue_free)
+
+
+## 死亡演出结束后开始倒计时(第一个房间的小怪会原地复活)。
+func _begin_respawn_wait() -> void:
+	visible = false
+	_awaiting_respawn = true
+	_respawn_at = Time.get_ticks_msec() / 1000.0 + respawn_seconds
+
+
+func _maybe_respawn() -> void:
+	if not _awaiting_respawn:
+		return
+	if Time.get_ticks_msec() / 1000.0 < _respawn_at:
+		return
+	_respawn()
+
+
+## 原地满血复活,回到出生点。
+func _respawn() -> void:
+	_awaiting_respawn = false
+	_dead = false
+	_hp = max_hp
+	global_position = _respawn_pos
+	visible = true
+	scale = Vector2.ONE
+	modulate.a = 0.0
+	_body.position = Vector2.ZERO
+	_body.modulate = Color.WHITE
+	_body.flip_h = false
+	_stun_time = 0.0
+	_anim_lock = 0.0
+	_cooldown = 1.2
+	_vel_y = 0.0
+	_on_floor = false
+	_facing = 1
+	_patrol_dir = 1
+	_patrol_pause = 0.0
+	_spawn_x = _respawn_pos.x
+	_spawn_set = true
+	add_to_group("enemy")
+	_hurtbox.set_deferred("monitorable", true)
+	_play(&"idle", 0.3)
+	var tw := create_tween()
+	tw.tween_property(self, "modulate:a", 1.0, 0.3)

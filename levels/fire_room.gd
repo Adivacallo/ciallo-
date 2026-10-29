@@ -20,10 +20,18 @@ const ROOM_SIZE := Vector2(1152, 648)
 const REVEAL_TINT := Color(0.55, 0.9, 1.0)
 const REVEAL_NORMAL := Color(1, 1, 1)
 
-## 背景使用 Kenney 橙色沙漠场景(每次击败衍月仍会走一遍切换演出,画面不变)。
+## 背景:[0] 是最开始的场景;之后每被打倒一次就换成下一张(见 BOSS_REVIVES)。
 const BG_PATHS := [
 	"res://picture/fire_room_bg/07_kenney_desert.png",
+	"res://picture/fire_room_bg/01_pink_city.png",
+	"res://picture/fire_room_bg/08_blue_night_skyline.png",
+	"res://picture/fire_room_bg/09_dark_city.webp",
+	"res://picture/fire_room_bg/02_orange_silhouette.png",
 ]
+## Boss 被打倒后原地复活的次数:每复活一次就换一张背景。
+const BOSS_REVIVES := 4
+## 第几次被打倒才真正结束(不再复活),进入真结局。
+const FINAL_DEFEAT := BOSS_REVIVES + 1
 const DEFEAT_LINES := [
 	"在平行时空穿越的你，是无法击败操控平行时空的我的",
 	"我可以输无数次，而你一次都不行",
@@ -101,17 +109,17 @@ func _play_intro() -> void:
 		_npc.connect("revived", _on_boss_revived)
 
 
-## 击败豆包:前两次回满血量并切背景;第三次进入真结局。
+## 击败豆包:前 BOSS_REVIVES 次回满血量 + 换背景并复活;最后一次进入真结局。
 func _on_boss_defeated() -> void:
 	_defeats += 1
-	if _defeats >= 3:
+	if _defeats >= FINAL_DEFEAT:
 		_start_bug_ending()
 		return
 	_heal_player()
 	_start_background_transition(_defeats)
 
 
-## 第三次击败后:停止 Boss 复活,弹出最后一段对话,再黑屏回主菜单。
+## 最后一次被击败后:停止 Boss 复活,弹出最后一段对话,再黑屏回主菜单。
 func _start_bug_ending() -> void:
 	if _bug_ending_started:
 		return
@@ -122,17 +130,17 @@ func _start_bug_ending() -> void:
 	add_child(ending)
 
 
-## 衍月复活(倒地 2 秒后)时才弹出对应台词;从第 3 次循环起,台词念完再给手枪提示。
+## 衍月复活(倒地 2 秒后)时才弹出对应台词;最后一次复活后,台词念完再给手枪提示。
 func _on_boss_revived() -> void:
 	_show_defeat_line()
-	if _defeats >= 3:
+	if _defeats >= BOSS_REVIVES:
 		await get_tree().create_timer(2.2).timeout
 		_open_pistol_window()
 
 
 # ---------------------------------------------------------------- 手枪 / 死亡
 
-## 接管主角的死亡:第 3 次循环后改为原地满血复活(并弹出字幕),之前仍是原来的死亡菜单。
+## 接管主角的死亡:进入最后一轮后改为原地满血复活(并弹出字幕),之前仍是原来的死亡菜单。
 func _setup_death_handling() -> void:
 	var hud := get_node_or_null("HUD")
 	if hud != null:
@@ -144,7 +152,7 @@ func _setup_death_handling() -> void:
 
 
 func _on_player_died() -> void:
-	if _defeats >= 3:
+	if _defeats >= BOSS_REVIVES:
 		_revive_player()
 	else:
 		var hud := get_node_or_null("HUD")
@@ -417,9 +425,11 @@ func _ensure_background() -> void:
 		_sky.visible = false
 
 
-## 优先走导入资源;导入缓存缺失时直接读 PNG,保证背景不会丢。
+## 优先走导入资源;导入缓存缺失时直接读原始图片(PNG/WebP 都行),保证背景不会丢。
 func _load_texture(path: String) -> Texture2D:
-	var tex := load(path) as Texture2D
+	var tex: Texture2D = null
+	if ResourceLoader.exists(path):
+		tex = load(path) as Texture2D
 	if tex != null:
 		return tex
 	var img := Image.new()
