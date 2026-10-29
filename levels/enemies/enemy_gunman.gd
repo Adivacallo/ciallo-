@@ -210,7 +210,7 @@ func _drop_tokens() -> void:
 	var host := get_tree().current_scene
 	if host == null:
 		host = get_parent()
-	TOKEN_DROP.burst(host, global_position + Vector2(0.0, -14.0))
+	TOKEN_DROP.burst(host, global_position + Vector2(0.0, -14.0), TOKEN_DROP.MOB_COUNT)
 
 
 func _die() -> void:

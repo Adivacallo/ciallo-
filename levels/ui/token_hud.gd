@@ -1,15 +1,20 @@
 extends Panel
-## token 计数面板:显示 Tokens 单例的数量,拾取光点时数字跳动一下。
-## 两处使用:HUD 右上角(套用 HUD 的样式/字体)、变强界面左上角(用自带主题)。
+## 右上角的数值小面板:标题 + 数字,数值变化时数字跳动一下。
+## 默认显示 Tokens 单例的数量;变强界面左上角和 HUD 的 EXP 条也复用它。
 
 const PANEL_SIZE := Vector2(176.0, 40.0)
+
+## 绑定的数据源(自动加载节点路径 / 属性名 / 标题)
+var source_path := "/root/Tokens"
+var source_property := "total"
+var caption_text := "TOKEN"
 
 var _caption: Label
 var _value: Label
 var _pop: Tween
 
 
-## 由 HUD 调用:套用 HUD 的字体与面板样式,并绑定 Tokens。
+## 由 HUD 调用:套用 HUD 的字体与面板样式。
 func setup(style_source: Panel, font_source: Label) -> void:
 	var style: StyleBox = null
 	if style_source != null:
@@ -31,13 +36,13 @@ func build(style: StyleBox, font: Font) -> void:
 	if font != null:
 		_caption.add_theme_font_override("font", font)
 		_value.add_theme_font_override("font", font)
-	_bind_tokens()
+	_bind_source()
 
 
 func _build_labels() -> void:
 	_caption = Label.new()
-	_caption.name = "TokenCaption"
-	_caption.text = "TOKEN"
+	_caption.name = "ValueCaption"
+	_caption.text = caption_text
 	_caption.position = Vector2(14.0, 9.0)
 	_caption.size = Vector2(80.0, 20.0)
 	_caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -46,7 +51,7 @@ func _build_labels() -> void:
 	add_child(_caption)
 
 	_value = Label.new()
-	_value.name = "TokenValue"
+	_value.name = "ValueLabel"
 	_value.text = "0"
 	_value.position = Vector2(70.0, 4.0)
 	_value.size = Vector2(92.0, 32.0)
@@ -60,19 +65,27 @@ func _build_labels() -> void:
 	add_child(_value)
 
 
-func _bind_tokens() -> void:
-	var tokens := get_node_or_null("/root/Tokens")
-	if tokens == null:
+func _bind_source() -> void:
+	var source := get_node_or_null(source_path)
+	if source == null:
 		return
-	if tokens.has_signal("changed") and not tokens.is_connected("changed", _on_tokens_changed):
-		tokens.connect("changed", _on_tokens_changed)
-	_on_tokens_changed(int(tokens.get("total")))
+	if source.has_signal("changed") and not source.is_connected("changed", _on_value_changed):
+		source.connect("changed", _on_value_changed)
+	_refresh()
 
 
-func _on_tokens_changed(total: int) -> void:
+func _on_value_changed(_arg := 0) -> void:
+	_refresh()
+
+
+func _refresh() -> void:
 	if _value == null:
 		return
-	_value.text = str(total)
+	var source := get_node_or_null(source_path)
+	if source == null:
+		return
+	var raw: Variant = source.get(source_property)
+	_value.text = str(int(raw)) if raw != null else "0"
 	if not is_inside_tree():
 		return
 	if _pop != null and _pop.is_valid():

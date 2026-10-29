@@ -13,6 +13,7 @@ const WALK_IN_START_X := 40.0
 const WALK_IN_SPEED := 120.0
 ## 第一个房间的小怪被击败后多少秒原地刷新
 const ENEMY_RESPAWN_SECONDS := 10.0
+const UI_FONT := preload(\"res://levels/ui/ui_font.gd\")
 
 @onready var world: Node2D = $WorldMain
 @onready var player: CharacterBody2D = $Player
@@ -33,9 +34,66 @@ func _ready() -> void:
 	if w_hud != null:
 		w_hud.queue_free()
 	_setup_enemy_respawn()
-	_start_opening_walk_in()
 	if dim_label != null:
-		dim_label.text = \"[+] 直接前往火雨房间\"
+		dim_label.add_theme_font_override(\"font\", UI_FONT.make(false))
+	if _returning_from_boss():
+		_spawn_at_portal()
+	else:
+		_start_opening_walk_in()
+		if dim_label != null:
+			dim_label.text = \"[+] 直接前往火雨房间\"
+
+
+## 刚从 Boss 房间死出来:把主角放在黑色传送门前。
+func _returning_from_boss() -> bool:
+	var progress := get_node_or_null(\"/root/BossProgress\")
+	return progress != null and bool(progress.call(\"take_returning\"))
+
+
+func _spawn_at_portal() -> void:
+	var portal := world.get_node_or_null(\"Extraction\") as Node2D
+	var spot := Vector2(11830.0, 600.0)
+	if portal != null:
+		spot = portal.global_position + Vector2(-120.0, -56.0)
+	player.global_position = spot
+	# 同伴精灵跟着一起回来(否则会被丢在地图另一头),并从此跟着主角走
+	var npc := world.get_node_or_null(\"VioletCompanion\") as Node2D
+	if npc != null:
+		npc.global_position = spot + Vector2(70.0, 0.0)
+		npc.set(\"velocity\", Vector2.ZERO)
+		if npc.has_method(\"set_following\"):
+			npc.call(\"set_following\", true)
+	var cam := player.get_node_or_null(\"Camera2D\") as Camera2D
+	if cam != null:
+		cam.reset_smoothing()
+	if dim_label != null:
+		var progress := get_node_or_null(\"/root/BossProgress\")
+		var phase := int(progress.get(\"phase\")) if progress != null else 1
+		_show_portal_hint(\"回到传送门前 · 继续挑战第 %d 阶段\" % phase)
+
+
+## 顶部提示(放在 HUD 的 CanvasLayer 里才是屏幕坐标;DimLabel 挂在 Node2D 下会被相机带走)。
+func _show_portal_hint(text: String) -> void:
+	var hud := get_node_or_null(\"HUD\") as CanvasLayer
+	if hud == null:
+		return
+	var tip := Label.new()
+	tip.name = \"ResumeTip\"
+	tip.text = text
+	tip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tip.add_theme_font_override(\"font\", UI_FONT.make(false))
+	tip.add_theme_font_size_override(\"font_size\", 18)
+	tip.add_theme_color_override(\"font_color\", Color(0.55, 0.95, 1, 1))
+	tip.add_theme_color_override(\"font_outline_color\", Color(0, 0, 0, 0.9))
+	tip.add_theme_constant_override(\"outline_size\", 6)
+	tip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tip.position = Vector2(420.0, 10.0)
+	tip.size = Vector2(440.0, 32.0)
+	hud.add_child(tip)
+	var tw := create_tween()
+	tw.tween_interval(3.0)
+	tw.tween_property(tip, \"modulate:a\", 0.0, 0.8)
+	tw.tween_callback(tip.queue_free)
 
 
 ## 第一个房间的小怪被击败后 10 秒原地刷新。

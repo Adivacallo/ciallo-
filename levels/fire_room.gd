@@ -32,6 +32,10 @@ const BG_PATHS := [
 const BOSS_REVIVES := 4
 ## 第几次被打倒才真正结束(不再复活),进入真结局。
 const FINAL_DEFEAT := BOSS_REVIVES + 1
+## 每次打倒 Boss 掉的 token(按阶段顺序)
+const TOKENS_PER_PHASE := [200, 400, 800, 1200, 1600]
+## 死亡后退回的第一房间
+const FIRST_ROOM := "res://levels/game.tscn"
 const DEFEAT_LINES := [
 	"在平行时空穿越的你，是无法击败操控平行时空的我的",
 	"我可以输无数次，而你一次都不行",
@@ -55,6 +59,7 @@ var _self_shot_done := false
 var _defeats := 0
 var _intro_done := false
 var _bug_ending_started := false
+var _returning_home := false
 
 
 func _ready() -> void:
@@ -83,6 +88,11 @@ func _process(delta: float) -> void:
 
 ## 开场演出:衍月飘到右侧 → 身形蓝白闪烁几次 → 定住并进入敌对形态。
 func _play_intro() -> void:
+	# 上次死在 Boss 房间:直接从那一阶段开打,不放开场演出
+	var resume_phase := int(BossProgress.phase)
+	if resume_phase > 1:
+		_resume_phase(resume_phase)
+		return
 	await get_tree().create_timer(1.0).timeout
 	if _npc.has_method("set_following"):
 		_npc.call("set_following", false)
@@ -109,9 +119,29 @@ func _play_intro() -> void:
 		_npc.connect("revived", _on_boss_revived)
 
 
+## 从上次死亡的阶段继续:跳过开场演出,Boss 直接以该阶段的状态开战。
+func _resume_phase(phase: int) -> void:
+	_defeats = clampi(phase - 1, 0, FINAL_DEFEAT - 1)
+	_intro_done = true
+	if _npc.has_method("set_following"):
+		_npc.call("set_following", false)
+	_npc.global_position = Vector2(ROOM_SIZE.x - 190.0, BOSS_FLY_Y)
+	_npc.set("_phase", _defeats)
+	if _npc.has_method("become_hostile"):
+		_npc.call("become_hostile")
+	_apply_background_now(_defeats)
+	if _boss_bar != null and _boss_bar.has_method("bind"):
+		_boss_bar.call("bind", _npc, "豆包")
+	if not _npc.is_connected("defeated", _on_boss_defeated):
+		_npc.connect("defeated", _on_boss_defeated)
+	if not _npc.is_connected("revived", _on_boss_revived):
+		_npc.connect("revived", _on_boss_revived)
+
+
 ## 击败豆包:前 BOSS_REVIVES 次回满血量 + 换背景并复活;最后一次进入真结局。
 func _on_boss_defeated() -> void:
 	_defeats += 1
+	_award_tokens(_defeats)
 	if _defeats >= FINAL_DEFEAT:
 		_start_bug_ending()
 		return
@@ -119,11 +149,47 @@ func _on_boss_defeated() -> void:
 	_start_background_transition(_defeats)
 
 
+## 打倒一次 Boss 掉一份 token(200/400/800/1200/1600),并在它身上飘一行字。
+func _award_tokens(index: int) -> void:
+	if index <= 0 or index > TOKENS_PER_PHASE.size():
+		return
+	var amount := int(TOKENS_PER_PHASE[index - 1])
+	var tokens := get_node_or_null("/root/Tokens")
+	if tokens != null:
+		tokens.call("add", amount)
+	_pop_token_text(amount)
+
+
+func _pop_token_text(amount: int) -> void:
+	var label := Label.new()
+	label.text = "+%d TOKEN" % amount
+	label.z_index = 40
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_font_size_override("font_size", 28)
+	label.add_theme_color_override("font_color", Color(1.0, 0.86, 0.42))
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	label.add_theme_constant_override("outline_size", 8)
+	add_child(label)
+	var start := Vector2(560.0, 360.0)
+	if _npc != null and is_instance_valid(_npc):
+		start = _npc.global_position + Vector2(-52.0, -140.0)
+	label.global_position = start
+	var tw := create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(label, "global_position:y", start.y - 96.0, 1.2)
+	tw.tween_property(label, "modulate:a", 0.0, 0.7).set_delay(0.5)
+	tw.chain().tween_callback(label.queue_free)
+
+
 ## 最后一次被击败后:停止 Boss 复活,弹出最后一段对话,再黑屏回主菜单。
 func _start_bug_ending() -> void:
 	if _bug_ending_started:
 		return
 	_bug_ending_started = true
+	# Boss 打完,清掉「从某阶段继续」的进度
+	var progress := get_node_or_null("/root/BossProgress")
+	if progress != null:
+		progress.call("clear")
 	if _npc != null and _npc.has_method("stop_revive"):
 		_npc.call("stop_revive")
 	var ending := BUG_ENDING.instantiate()
@@ -151,13 +217,19 @@ func _setup_death_handling() -> void:
 		_player.connect("died", _on_player_died)
 
 
+## 死在 Boss 房间:记住打到第几阶段,黑屏后退回第一房间的传送门前。
 func _on_player_died() -> void:
-	if _defeats >= BOSS_REVIVES:
-		_revive_player()
-	else:
-		var hud := get_node_or_null("HUD")
-		if hud != null and hud.has_method("_on_player_died"):
-			hud.call("_on_player_died")
+	if _returning_home:
+		return
+	_returning_home = true
+	var progress := get_node_or_null("/root/BossProgress")
+	if progress != null:
+		progress.call("remember_phase", clampi(_defeats + 1, 1, FINAL_DEFEAT))
+	if _fade != null:
+		var tw := create_tween()
+		tw.tween_property(_fade, "color:a", 1.0, 0.9)
+		await get_tree().create_timer(1.0).timeout
+	get_tree().change_scene_to_file(FIRST_ROOM)
 
 
 func _revive_player() -> void:
@@ -269,6 +341,16 @@ func _heal_player() -> void:
 	var max_hp := int(_player.get("max_health"))
 	_player.set("health", max_hp)
 	_player.emit_signal("health_changed", max_hp, max_hp)
+
+
+## 直接把背景换成第 index 张,不播切换演出(从存档阶段继续时用)。
+func _apply_background_now(index: int) -> void:
+	if _bg == null:
+		return
+	var path: String = BG_PATHS[clampi(index, 0, BG_PATHS.size() - 1)]
+	var tex := _load_texture(path)
+	if tex != null:
+		_bg.texture = tex
 
 
 func _show_defeat_line() -> void:
