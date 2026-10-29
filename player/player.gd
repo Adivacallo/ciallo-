@@ -202,6 +202,11 @@ var _skill_shapes := {}
 var _hit_players: Array[AudioStreamPlayer] = []
 var _hit_voice := 0
 var _parry_ready_at := -99.0
+## 技能演出:锁定播放某个动画 + 无敌
+var _pose_lock := 0.0
+var _pose_anim: StringName = &""
+## 假死:保持死亡姿势、不受伤,按攻击键起身
+var _feigning := false
 
 @onready var _cam: Camera2D = $Camera2D
 @onready var _sprite: AnimatedSprite2D = $Sprite
@@ -278,6 +283,42 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	var now := _now()
+	if _pose_lock > 0.0:
+		_pose_lock = maxf(0.0, _pose_lock - delta)
+		velocity.x = move_toward(velocity.x, 0.0, 2400.0 * delta)
+		if not is_on_floor():
+			velocity.y += gravity * delta
+		if _sprite.is_playing():
+			_play(_pose_anim)
+		else:
+			_anim = _pose_anim
+			_sprite.play(_pose_anim)
+		move_and_slide()
+		return
+	if _feigning:
+		var creep := Input.get_axis("move_left", "move_right")
+		if creep != 0.0:
+			_facing = 1 if creep > 0.0 else -1
+			velocity.x = move_toward(velocity.x, creep * move_speed, 2200.0 * delta)
+		else:
+			velocity.x = move_toward(velocity.x, 0.0, 2600.0 * delta)
+		if is_on_floor():
+			_last_grounded = _now()
+			velocity.y = 0.0
+			if Input.is_action_just_pressed("jump"):
+				velocity.y = jump_velocity
+		if Input.is_action_just_released("jump") and velocity.y < -170.0:
+			velocity.y = -170.0
+		if not is_on_floor():
+			velocity.y += gravity * delta
+		_sprite.flip_h = _facing < 0
+		move_and_slide()
+		if Input.is_action_just_pressed("attack_light") \
+				or Input.is_action_just_pressed("attack_heavy") \
+				or Input.is_action_just_pressed("attack_dash") \
+				or Input.is_action_just_pressed("grenade"):
+			_exit_feign()
+		return
 	if _switch_anim:
 		if not _switch_death:
 			_update_skill(now)
@@ -894,7 +935,7 @@ func _tick_hurt(delta: float) -> void:
 
 
 func take_damage(amount: int, from_global: Vector2) -> void:
-	if _won or _walk_in_active or state == State.DEAD or _now() < _invuln_until:
+	if _won or _walk_in_active or _feigning or state == State.DEAD or _now() < _invuln_until:
 		return
 	health = maxi(0, health - amount)
 	health_changed.emit(health, max_health)
@@ -943,6 +984,61 @@ func _die() -> void:
 
 
 # ---------------------------------------------------------------- 表现
+
+## 假死:倒地不动、保持死亡姿势,期间免疫伤害;按任意攻击键起身。
+func feign_death() -> void:
+	if _feigning or state == State.DEAD or _switch_anim:
+		return
+	if state == State.ATTACK:
+		_end_attack()
+	_feigning = true
+	state = State.MOVE
+	_attack_id = &""
+	_hit_window = -1
+	_hit_ids.clear()
+	_buffer_id = &""
+	_pose_lock = 0.0
+	velocity = Vector2.ZERO
+	_skill_active = false
+	_skill_aura.visible = false
+	_fx.visible = false
+	_fx.stop()
+	_sprite.sprite_frames = DEATH_FRAMES
+	_sprite.speed_scale = 1.0
+	_sprite.flip_h = _facing < 0
+	_sprite.play(&"death")
+	_anim = &"death"
+
+
+func _exit_feign() -> void:
+	if not _feigning:
+		return
+	_feigning = false
+	_apply_style_frames()
+	state = State.MOVE
+	_hurt_timer = 0.0
+	_anim = &""
+	_play(&"idle", true)
+	_invuln_until = maxf(_invuln_until, _now() + 0.4)
+
+
+## 技能演出:锁定播放某个动画并进入无敌,持续 seconds 秒(不结算近战伤害)。
+func play_pose(anim: StringName, seconds: float) -> void:
+	if state == State.DEAD or _switch_anim:
+		return
+	if state == State.ATTACK:
+		_end_attack()
+	state = State.MOVE
+	_attack_id = &""
+	_hit_window = -1
+	_hit_ids.clear()
+	_buffer_id = &""
+	_pose_anim = anim
+	_pose_lock = maxf(0.0, seconds)
+	_invuln_until = maxf(_invuln_until, _now() + seconds)
+	_anim = &""
+	_play(anim, true)
+
 
 func _play(anim: StringName, force := false) -> void:
 	if _anim == anim and not force:

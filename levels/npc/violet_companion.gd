@@ -219,6 +219,11 @@ func _try_interact() -> void:
 	_play_reaction()
 
 
+## 交互菜单「与鲸鱼娘互动」:随机播一段动作。
+func play_random_reaction() -> void:
+	_play_reaction()
+
+
 ## 随机播一种素材反应(没有菜单时的兜底,以及选「离开」时的道别动作)。
 func _play_reaction() -> void:
 	if _hostile or _dead or _reaction_time > 0.0:

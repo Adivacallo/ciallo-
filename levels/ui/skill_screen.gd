@@ -131,8 +131,9 @@ func _refresh_state() -> void:
 			unlocked_count += 1
 		match state:
 			"locked":
-				btn.text = "%s（解锁 %d token）" % [label, SKILL_COST]
-				btn.disabled = held < SKILL_COST
+				var cost := int(stats.call("skill_cost", key))
+				btn.text = "%s（解锁 %d token）" % [label, cost]
+				btn.disabled = held < cost
 			"equipped":
 				carried += 1
 				var slot := int(stats.call("slot_of", key))

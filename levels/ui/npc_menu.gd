@@ -15,7 +15,8 @@ const OPTION_OFFSET := Vector2(48.0, -112.0)
 @onready var _option_buttons := {
 	"upgrade": $Root/Options/Lines/Option1,
 	"skill": $Root/Options/Lines/Option2,
-	"leave": $Root/Options/Lines/Option3,
+	"whale": $Root/Options/Lines/Option3,
+	"leave": $Root/Options/Lines/Option4,
 }
 
 var _npc: Node2D
@@ -96,7 +97,7 @@ func _on_screen_close() -> void:
 	close()
 
 
-## 鼠标点选项:和按 1 / 2 / 3 等价。
+## 鼠标点选项:和按 1 / 2 / 3 / 4 等价。
 func _on_option_pressed(key: String) -> void:
 	if not _opened:
 		return
@@ -105,8 +106,17 @@ func _on_option_pressed(key: String) -> void:
 			_show_upgrade()
 		"skill":
 			_show_skill()
+		"whale":
+			_interact_with_npc()
 		_:
 			close()
+
+
+## 与鲸鱼娘互动:关闭菜单,让跟随者随机播一段动作。
+func _interact_with_npc() -> void:
+	if is_instance_valid(_npc) and _npc.has_method("play_random_reaction"):
+		_npc.call("play_random_reaction")
+	close()
 
 
 func _input(event: InputEvent) -> void:
@@ -129,6 +139,9 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		_show_skill()
 	elif code == KEY_3 or code == KEY_KP_3:
+		get_viewport().set_input_as_handled()
+		_interact_with_npc()
+	elif code == KEY_4 or code == KEY_KP_4:
 		get_viewport().set_input_as_handled()
 		close()
 

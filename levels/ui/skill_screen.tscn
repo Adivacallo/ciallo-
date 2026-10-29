@@ -203,7 +203,7 @@ grow_horizontal = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.5, 0.9, 1, 0.85)
 theme_override_font_sizes/font_size = 15
-text = "// SKILL   ·   100 token 解锁 · 最多携带两个（框一 U / 框二 I）"
+text = "// SKILL   ·   用 token 解锁 · 最多携带两个（框一 U / 框二 I）"
 horizontal_alignment = 1
 
 [node name="Rule" type="ColorRect" parent="."]
@@ -327,7 +327,7 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.8, 0.88, 0.98, 0.85)
 theme_override_font_sizes/font_size = 14
-text = "回复：立刻恢复 80% 血量。混沌爆炎：2 秒内朝面向散射 20 发火焰弹，每发 80 伤害。"
+text = "回复：立刻恢复 80% 血量。混沌爆炎：2 秒内朝面向散射 20 发火焰弹，每发 5 伤害。龙卷风：锁动作 2 秒并进入无敌，放出横扫 3/4 场地的旋风，每次 250 伤害。闪现：瞬移半个场地，空中可用，每次消耗 10 token，瞬移期间无敌。"
 
 [node name="BodyTag" type="Label" parent="Body/Lines"]
 layout_mode = 2

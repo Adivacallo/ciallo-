@@ -4,7 +4,7 @@ extends Node2D
 
 const STRIPS := preload("res://levels/enemies/strip_anim.gd")
 const FRAMES_PATH := "res://levels/boss/fireball_frames.png"
-const DAMAGE := 80
+const DAMAGE := 5
 const SPEED := 620.0
 const LIFETIME := 1.8
 const HIT_RADIUS := 24.0

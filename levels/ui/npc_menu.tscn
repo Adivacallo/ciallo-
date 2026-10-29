@@ -111,6 +111,22 @@ alignment = 0
 [node name="Option3" type="Button" parent="Root/Options/Lines"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxEmpty_opt")
+theme_override_styles/hover = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_opt")
+text = "3：与鲸鱼娘互动"
+alignment = 0
+
+[node name="Option4" type="Button" parent="Root/Options/Lines"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.82, 0.86, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
@@ -121,7 +137,7 @@ theme_override_styles/normal = SubResource("StyleBoxEmpty_opt")
 theme_override_styles/hover = SubResource("StyleBoxFlat_opt_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_opt_hover")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_opt")
-text = "3：离开"
+text = "4：离开"
 alignment = 0
 
 [node name="UpgradeScreen" parent="Root" instance=ExtResource("2_screen")]
