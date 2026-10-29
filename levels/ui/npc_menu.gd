@@ -1,6 +1,6 @@
 extends CanvasLayer
-## 蓝色精灵的交互菜单:按 F 后在她右边弹出「1：我要变强 / 2：离开」,
-## 选 1 打开整屏的变强界面;选 2 / ESC 关闭。菜单打开时暂停游戏。
+## 蓝色精灵的交互菜单:按 F 后在她右边弹出「1：我要变强 / 2：技能改换 / 3：离开」,
+## 选 1 打开变强界面,选 2 打开技能改换界面,选 3 / ESC 关闭。菜单打开时暂停游戏。
 
 signal closed(used_upgrade: bool)
 
@@ -11,11 +11,19 @@ const OPTION_OFFSET := Vector2(48.0, -112.0)
 @onready var _root: Control = $Root
 @onready var _options: PanelContainer = $Root/Options
 @onready var _screen: Control = $Root/UpgradeScreen
+@onready var _skill_screen: Control = $Root/SkillScreen
+@onready var _option_buttons := {
+	"upgrade": $Root/Options/Lines/Option1,
+	"skill": $Root/Options/Lines/Option2,
+	"leave": $Root/Options/Lines/Option3,
+}
 
 var _npc: Node2D
 var _opened := false
 var _used_upgrade := false
 var _paused_by_us := false
+## 时停时被冻结的角色(主角 + 同伴),关闭时按原样恢复
+var _frozen: Array = []
 
 
 func _ready() -> void:
@@ -24,7 +32,12 @@ func _ready() -> void:
 	visible = false
 	_options.visible = false
 	_screen.visible = false
+	_skill_screen.visible = false
 	_screen.connect("close_requested", _on_screen_close)
+	_skill_screen.connect("close_requested", _on_screen_close)
+	# 三个选项也能直接用鼠标点
+	for key in _option_buttons.keys():
+		(_option_buttons[key] as Button).pressed.connect(_on_option_pressed.bind(key))
 	set_process(false)
 
 
@@ -41,6 +54,7 @@ func open(npc: Node2D) -> void:
 	visible = true
 	_options.visible = true
 	_screen.visible = false
+	_skill_screen.visible = false
 	_pause_game()
 	_refresh_position()
 	set_process(true)
@@ -55,6 +69,7 @@ func close() -> void:
 	visible = false
 	_options.visible = false
 	_screen.visible = false
+	_skill_screen.visible = false
 	set_process(false)
 	_resume_game()
 	closed.emit(used)
@@ -66,6 +81,12 @@ func _show_upgrade() -> void:
 	_screen.call("open")
 
 
+func _show_skill() -> void:
+	_used_upgrade = true
+	_options.visible = false
+	_skill_screen.call("open")
+
+
 func _exit_tree() -> void:
 	# 场景被卸载时别把游戏留在暂停里。
 	_resume_game()
@@ -73,6 +94,19 @@ func _exit_tree() -> void:
 
 func _on_screen_close() -> void:
 	close()
+
+
+## 鼠标点选项:和按 1 / 2 / 3 等价。
+func _on_option_pressed(key: String) -> void:
+	if not _opened:
+		return
+	match key:
+		"upgrade":
+			_show_upgrade()
+		"skill":
+			_show_skill()
+		_:
+			close()
 
 
 func _input(event: InputEvent) -> void:
@@ -86,12 +120,15 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		close()
 		return
-	if _screen.visible:
+	if _screen.visible or _skill_screen.visible:
 		return
 	if code == KEY_1 or code == KEY_KP_1:
 		get_viewport().set_input_as_handled()
 		_show_upgrade()
 	elif code == KEY_2 or code == KEY_KP_2:
+		get_viewport().set_input_as_handled()
+		_show_skill()
+	elif code == KEY_3 or code == KEY_KP_3:
 		get_viewport().set_input_as_handled()
 		close()
 
@@ -118,14 +155,42 @@ func _refresh_position() -> void:
 
 
 func _pause_game() -> void:
-	if get_tree().paused:
-		return
-	get_tree().paused = true
-	_paused_by_us = true
+	if not get_tree().paused:
+		get_tree().paused = true
+		_paused_by_us = true
+	_freeze_actors()
 
 
 func _resume_game() -> void:
+	_unfreeze_actors()
 	if not _paused_by_us:
 		return
 	_paused_by_us = false
 	get_tree().paused = false
+
+
+## 除了暂停整棵树,再把主角和同伴精灵本身停掉(速度清零 + 处理禁用),
+## 这样哪怕外部把暂停解掉了,这两个也一定是「时停」状态。
+func _freeze_actors() -> void:
+	_unfreeze_actors()
+	var targets: Array = []
+	for node in get_tree().get_nodes_in_group("player"):
+		targets.append(node)
+	if is_instance_valid(_npc):
+		targets.append(_npc)
+	for node in targets:
+		if node == null or not is_instance_valid(node) or not (node is Node):
+			continue
+		var body := node as Node
+		if body is CharacterBody2D:
+			(body as CharacterBody2D).velocity = Vector2.ZERO
+		_frozen.append({"node": body, "mode": body.process_mode})
+		body.process_mode = Node.PROCESS_MODE_DISABLED
+
+
+func _unfreeze_actors() -> void:
+	for entry in _frozen:
+		var node: Variant = entry.get("node")
+		if node != null and is_instance_valid(node):
+			(node as Node).process_mode = int(entry.get("mode", Node.PROCESS_MODE_INHERIT))
+	_frozen.clear()

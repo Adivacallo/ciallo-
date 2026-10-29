@@ -16,6 +16,19 @@ const UPGRADES := {
 ## 每条线已买的等级
 var levels := {"attack": 0, "health": 0, "invuln": 0, "parry": 0}
 
+## 主动技能:每条 100 token 解锁;最多只能携带 2 个,
+## 依次装进框一(按键 U)和框二(按键 I)。
+const SKILL_COST := 100
+const SKILL_SLOTS := 2
+## 技能表:加新技能往这里加一行就行(顺序 = 界面上列出的顺序)
+const SKILLS := {
+	"heal": {"name": "回复", "label": "回复：恢复80%血量"},
+	"blaze": {"name": "混沌爆炎", "label": "混沌爆炎：释放高伤害火焰弹"},
+}
+var skill_unlocked := {"heal": false, "blaze": false}
+## 已装配的技能(长度 2,空槽是空字符串)。框一 = U,框二 = I
+var skill_slots: Array = ["", ""]
+
 
 func has_upgrade(key: String) -> bool:
 	return UPGRADES.has(key)
@@ -64,6 +77,106 @@ func buy(key: String) -> bool:
 	return true
 
 
+# ---------------------------------------------------------------- 主动技能
+
+## 技能表里的所有 key(保持表里的顺序)
+func skill_keys() -> Array:
+	var out: Array = []
+	for key in SKILLS.keys():
+		out.append(String(key))
+	return out
+
+
+func skill_label(key: String) -> String:
+	return String((SKILLS.get(key, {}) as Dictionary).get("label", key))
+
+
+func skill_name(key: String) -> String:
+	return String((SKILLS.get(key, {}) as Dictionary).get("name", key))
+
+
+## 某个技能装在哪个框(0 = 框一,1 = 框二,-1 = 没装)
+func slot_of(key: String) -> int:
+	for i in skill_slots.size():
+		if String(skill_slots[i]) == key:
+			return i
+	return -1
+
+
+## 框里装的技能 key(空槽返回 "")
+func slot_skill(index: int) -> String:
+	if index < 0 or index >= skill_slots.size():
+		return ""
+	return String(skill_slots[index])
+
+
+## 下一个空槽的下标;满了返回 -1
+func next_free_slot() -> int:
+	for i in skill_slots.size():
+		if String(skill_slots[i]) == "":
+			return i
+	return -1
+
+
+## "locked" / "unlocked" / "equipped"
+func skill_state(key: String) -> String:
+	if slot_of(key) >= 0:
+		return "equipped"
+	if is_skill_unlocked(key):
+		return "unlocked"
+	return "locked"
+
+
+func is_skill_unlocked(key: String) -> bool:
+	return bool(skill_unlocked.get(key, false))
+
+
+func is_skill_equipped(key: String) -> bool:
+	return slot_of(key) >= 0
+
+
+## 花 100 token 解锁技能。
+func unlock_skill(key: String) -> bool:
+	if not SKILLS.has(key) or is_skill_unlocked(key):
+		return false
+	var tokens := get_node_or_null("/root/Tokens")
+	if tokens == null or int(tokens.get("total")) < SKILL_COST:
+		return false
+	tokens.call("add", -SKILL_COST)
+	skill_unlocked[key] = true
+	changed.emit()
+	return true
+
+
+## 装进第一个空框;两个框都满了返回 false。
+func equip_skill(key: String) -> bool:
+	if not is_skill_unlocked(key) or is_skill_equipped(key):
+		return false
+	var slot := next_free_slot()
+	if slot < 0:
+		return false
+	skill_slots[slot] = key
+	changed.emit()
+	return true
+
+
+## 从框里卸下。
+func unequip_skill(key: String) -> bool:
+	var slot := slot_of(key)
+	if slot < 0:
+		return false
+	skill_slots[slot] = ""
+	changed.emit()
+	return true
+
+
+## 点了技能条目:已装 → 卸下;没装 → 装进第一个空框。
+func toggle_skill(key: String) -> bool:
+	if is_skill_equipped(key):
+		return unequip_skill(key)
+	return equip_skill(key)
+
+
 # ---------------------------------------------------------------- 各条线的倍率
 
 ## 主角攻击伤害(拳脚 / 飞刀 / 手雷 / 反弹子弹都走这里)
@@ -93,4 +206,8 @@ func parry_scale() -> float:
 func reset() -> void:
 	for key in levels.keys():
 		levels[key] = 0
+	for key in skill_unlocked.keys():
+		skill_unlocked[key] = false
+	for i in skill_slots.size():
+		skill_slots[i] = ""
 	changed.emit()
