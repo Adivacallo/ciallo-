@@ -1,6 +1,6 @@
 extends Node
 ## 主角的成长数值:变强界面买到的强化都记在这里(自动加载,跨关卡保留)。
-## 四条强化线:攻击伤害 / 血量上限 / 无敌时间 / 弹反范围,
+## 五条强化线:攻击伤害 / 血量上限 / 无敌时间 / 弹反范围 / 技能效果,
 ## 都是 4 级、价格 24 / 48 / 96 / 192,越买越强。
 
 signal changed
@@ -11,10 +11,11 @@ const UPGRADES := {
 	"health": {"step": 1.5, "max": 4, "costs": [24, 48, 96, 192]},
 	"invuln": {"step": 1.3, "max": 4, "costs": [24, 48, 96, 192]},
 	"parry": {"step": 1.3, "max": 4, "costs": [24, 48, 96, 192]},
+	"skill": {"step": 1.3, "max": 4, "costs": [24, 48, 96, 192]},
 }
 
 ## 每条线已买的等级
-var levels := {"attack": 0, "health": 0, "invuln": 0, "parry": 0}
+var levels := {"attack": 0, "health": 0, "invuln": 0, "parry": 0, "skill": 0}
 
 ## 主动技能:每条 100 token 解锁;最多只能携带 2 个,
 ## 依次装进框一(按键 U)和框二(按键 I)。
@@ -208,6 +209,11 @@ func invuln_scale() -> float:
 ## 弹反半径倍率
 func parry_scale() -> float:
 	return multiplier("parry")
+
+
+## 技能效果倍率(回复量 / 火焰弹伤害 / 龙卷风伤害)
+func skill_scale() -> float:
+	return multiplier("skill")
 
 
 ## 清空成长(重新开档时用)。

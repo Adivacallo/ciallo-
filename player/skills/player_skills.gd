@@ -62,10 +62,13 @@ func _physics_process(delta: float) -> void:
 		_cast_slot(0, player)
 	if Input.is_action_just_pressed("skill_2"):
 		_cast_slot(1, player)
-
-
 	if Input.is_action_just_pressed("skill_3"):
 		_cast_feign(player)
+
+
+## 技能基础数值按「加强技能」倍率放大。
+func _scaled(base: int) -> int:
+	return maxi(1, int(round(float(base) * PlayerStats.skill_scale())))
 
 
 ## 释放某个框(0 = 框一 / U,1 = 框二 / I)里装的技能。
@@ -97,7 +100,7 @@ func _cast_heal(player: Node2D) -> void:
 	if hp >= max_hp:
 		return
 	_heal_cd = HEAL_COOLDOWN
-	var amount := int(round(float(max_hp) * HEAL_PERCENT))
+	var amount := int(round(float(max_hp) * HEAL_PERCENT * PlayerStats.skill_scale()))
 	var target := mini(max_hp, hp + amount)
 	player.set("health", target)
 	player.emit_signal("health_changed", target, max_hp)
@@ -128,7 +131,7 @@ func _cast_blaze(player: Node2D) -> void:
 		var ball := FIREBALL.instantiate()
 		host.add_child(ball)
 		ball.global_position = player.global_position + Vector2(facing * 34.0, -58.0)
-		ball.call("setup", dir, BLAZE_DAMAGE)
+		ball.call("setup", dir, _scaled(BLAZE_DAMAGE))
 		await get_tree().create_timer(gap).timeout
 	_blazing = false
 
@@ -149,7 +152,7 @@ func _cast_tornado(player: Node2D) -> void:
 	var tornado := TORNADO.instantiate()
 	host.add_child(tornado)
 	tornado.global_position = player.global_position + Vector2(facing * 26.0, 0.0)
-	tornado.call("setup", Vector2(facing, 0.0), TORNADO_DAMAGE)
+	tornado.call("setup", Vector2(facing, 0.0), _scaled(TORNADO_DAMAGE))
 
 
 # ---------------------------------------------------------------- 闪现

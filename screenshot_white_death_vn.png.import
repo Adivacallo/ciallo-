@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bervudt0dpum5"
-path="res://.godot/imported/screenshot_upgrade_four_lines.png-5591502d88dbc885529a0798e6c6890e.ctex"
+uid="uid://c6616aoih1ao4"
+path="res://.godot/imported/screenshot_white_death_vn.png-289d7ab6858556073bdc929db486c1b2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://screenshot_upgrade_four_lines.png"
-dest_files=["res://.godot/imported/screenshot_upgrade_four_lines.png-5591502d88dbc885529a0798e6c6890e.ctex"]
+source_file="res://screenshot_white_death_vn.png"
+dest_files=["res://.godot/imported/screenshot_white_death_vn.png-289d7ab6858556073bdc929db486c1b2.ctex"]
 
 [params]
 

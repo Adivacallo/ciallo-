@@ -288,12 +288,27 @@ theme_override_styles/disabled = SubResource("StyleBoxFlat_opt_off")
 theme_override_styles/focus = SubResource("StyleBoxFlat_opt")
 text = "加强弹反范围+30%"
 
+[node name="SkillButton" type="Button" parent="Body/Lines"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.55, 0.63, 0.72, 0.9)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_opt")
+theme_override_styles/hover = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_opt_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_opt_off")
+theme_override_styles/focus = SubResource("StyleBoxFlat_opt")
+text = "加强技能+30%"
+
 [node name="BodyHint" type="Label" parent="Body/Lines"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.8, 0.88, 0.98, 0.85)
 theme_override_font_sizes/font_size = 14
-text = "用击杀掉落的 token 强化自身，四条线各自独立升级。"
+text = "用击杀掉落的 token 强化自身，五条线各自独立升级。"
 
 [node name="BodyTag" type="Label" parent="Body/Lines"]
 layout_mode = 2

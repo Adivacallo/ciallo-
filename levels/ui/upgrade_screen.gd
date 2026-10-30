@@ -6,12 +6,13 @@ signal close_requested
 
 const UI_FONT := preload("res://levels/ui/ui_font.gd")
 
-## 四条强化线的显示名
+## 五条强化线的显示名
 const LABELS := {
 	"attack": "加强攻击伤害+50%",
 	"health": "加强血量+50%",
 	"invuln": "加强无敌时间+30%",
 	"parry": "加强弹反范围+30%",
+	"skill": "加强技能+30%",
 }
 
 @onready var _token_hud: Panel = $TokenHud
@@ -22,6 +23,7 @@ const LABELS := {
 	"health": $Body/Lines/HealthButton,
 	"invuln": $Body/Lines/InvulnButton,
 	"parry": $Body/Lines/ParryButton,
+	"skill": $Body/Lines/SkillButton,
 }
 
 
@@ -89,11 +91,12 @@ func _refresh_state() -> void:
 			btn.text = "%s（Lv.%d/%d · %d token）" % [label, level, max_level, cost]
 			btn.disabled = held < cost
 
-	_state_label.text = "// 攻击 ×%.2f · 血量 ×%.2f · 无敌 ×%.2f · 弹反 ×%.2f · 持有 %d token" % [
+	_state_label.text = "// 攻击 ×%.2f · 血量 ×%.2f · 无敌 ×%.2f · 弹反 ×%.2f · 技能 ×%.2f · 持有 %d token" % [
 		stats.call("multiplier", "attack"),
 		stats.call("multiplier", "health"),
 		stats.call("multiplier", "invuln"),
 		stats.call("multiplier", "parry"),
+		stats.call("multiplier", "skill"),
 		held,
 	]
 

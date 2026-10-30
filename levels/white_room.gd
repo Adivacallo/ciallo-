@@ -23,7 +23,13 @@ const PORTRAIT_AUTHOR := "res://levels/npc/scientist.png"
 const PORTRAIT_DOUBAO := "res://picture/programmer.png"
 const PORTRAITS := [PORTRAIT_AUTHOR, PORTRAIT_AUTHOR, PORTRAIT_AUTHOR, PORTRAIT_DOUBAO]
 const VN_SCENE := preload("res://intro.tscn")
-const DEATH_LINE := "你们又会将这个混乱的世界变得如何呢"
+## 被打倒后的对白
+const DEATH_LINES := [
+	"呃啊。。。",
+	"对不起是我搞错了，这次我直接跟你说100%大实话，你根本不是她的对手。",
+]
+const DEATH_SPEAKERS := ["程序猿", "豆包"]
+const DEATH_PORTRAITS := [PORTRAIT_AUTHOR, PORTRAIT_DOUBAO]
 
 @onready var _player: Node2D = $Player
 @onready var _npc: Node2D = $Scientist
@@ -65,16 +71,17 @@ func _run_intro() -> void:
 
 
 ## 用和黑房间同一套 galgame 界面播白房间的对白(浮层,不切场景)。
-func _play_vn() -> void:
+func _play_vn(lines: Array = LINES, speakers: Array = SPEAKERS,
+		portraits: Array = PORTRAITS, loading := "> 战斗开始") -> void:
 	var vn := VN_SCENE.instantiate()
-	vn.set("custom_lines", PackedStringArray(LINES))
-	vn.set("speaker_names", PackedStringArray(SPEAKERS))
-	vn.set("portrait_paths", PackedStringArray(PORTRAITS))
+	vn.set("custom_lines", PackedStringArray(lines))
+	vn.set("speaker_names", PackedStringArray(speakers))
+	vn.set("portrait_paths", PackedStringArray(portraits))
 	vn.set("voice_enabled", false)
 	vn.set("stay_in_scene", true)
-	vn.set("portrait_source_path", PORTRAIT_AUTHOR)
+	vn.set("portrait_source_path", String(portraits[0]) if portraits.size() > 0 else PORTRAIT_AUTHOR)
 	vn.set("header_tag", "// AUTHOR")
-	vn.set("loading_text", "> 战斗开始")
+	vn.set("loading_text", loading)
 	var layer := CanvasLayer.new()
 	layer.name = "VN"
 	layer.layer = 30
@@ -85,11 +92,16 @@ func _play_vn() -> void:
 		layer.queue_free()
 
 
+## 打倒研究员:再来一段对白,然后他淡出、留下BUG源。
 func _on_npc_defeated() -> void:
 	if _npc == null or not is_instance_valid(_npc):
 		_spawn_core_orb()
 		return
-	_dialogue.call("show_line", DEATH_LINE, _npc.global_position + Vector2(0, -215), 2.0)
+	if _player != null:
+		_player.process_mode = Node.PROCESS_MODE_DISABLED
+	await _play_vn(DEATH_LINES, DEATH_SPEAKERS, DEATH_PORTRAITS, "> 战斗结束")
+	if _player != null:
+		_player.process_mode = Node.PROCESS_MODE_INHERIT
 	_npc.call("fade_out", 2.0)
 	_spawn_core_orb()
 
