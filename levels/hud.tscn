@@ -274,7 +274,7 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 6
 theme_override_fonts/font = SubResource("SystemFont_hud")
 theme_override_font_sizes/font_size = 14
-text = "E 掷雷(冷却2s)   J 轻击   K 重击   L 突进斩   Shift 闪避\n空中 J 空中斩   F 互动   1 拳击 / 2 远程   [+] 直达火雨房间\nSpace 时域强化(9s无敌 / 30s冷却)   S 弹反(3s冷却)\nU 回复(80%血量)   I 混沌爆炎(2s内散射20发)"
+text = "E 掷雷(冷却2s)   J 轻击   K 重击   L 突进斩   Shift 闪避\n空中 J 空中斩   F 互动   1 拳击 / 2 远程\nSpace 时域强化(9s无敌 / 30s冷却)   S 弹反(3s冷却)"
 
 [node name="WinBanner" type="Control" parent="."]
 visible = false

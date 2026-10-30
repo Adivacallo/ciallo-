@@ -6,9 +6,10 @@ extends Node2D
 const FLOOR_TILE := preload("res://levels/hazards/fire_room_ground.png")
 const BOSS_BAR_SCRIPT := preload("res://levels/ui/boss_bar.gd")
 const DIALOGUE_SCRIPT := preload("res://levels/ui/boss_dialogue.gd")
-const BUG_ENDING := preload("res://levels/ui/bug_ending.tscn")
 const BG_BLUR := preload("res://shaders/bg_blur.gdshader")
 const VOID_SCENE := "res://levels/void_room.tscn"
+## 打完最后一阶段 Boss 后先播鲸鱼娘的 galgame 式对白,再进黑房间
+const WHALE_BRIEFING := "res://levels/whale_briefing.tscn"
 const PLAYER_BASE_FRAMES := preload("res://player/red_frames.tres")
 const PLAYER_DEATH_FRAMES := preload("res://player/character/death_frames.tres")
 const PISTOL_BANG := preload("res://audio/explosions/grenade_bang.ogg")
@@ -58,7 +59,6 @@ var _pistol_unlocked := false
 var _self_shot_done := false
 var _defeats := 0
 var _intro_done := false
-var _bug_ending_started := false
 var _returning_home := false
 
 
@@ -138,12 +138,12 @@ func _resume_phase(phase: int) -> void:
 		_npc.connect("revived", _on_boss_revived)
 
 
-## 击败豆包:前 BOSS_REVIVES 次回满血量 + 换背景并复活;最后一次进入真结局。
+## 击败豆包:前 BOSS_REVIVES 次回满血量 + 换背景并复活;最后一次直接进全黑房间。
 func _on_boss_defeated() -> void:
 	_defeats += 1
 	_award_tokens(_defeats)
 	if _defeats >= FINAL_DEFEAT:
-		_start_bug_ending()
+		_finish_run()
 		return
 	_heal_player()
 	_start_background_transition(_defeats)
@@ -181,19 +181,22 @@ func _pop_token_text(amount: int) -> void:
 	tw.chain().tween_callback(label.queue_free)
 
 
-## 最后一次被击败后:停止 Boss 复活,弹出最后一段对话,再黑屏回主菜单。
-func _start_bug_ending() -> void:
-	if _bug_ending_started:
+## 打完最后一阶段 Boss:黑屏后直接进入全黑房间(不再放 BUG 结局演出)。
+func _finish_run() -> void:
+	if _returning_home:
 		return
-	_bug_ending_started = true
+	_returning_home = true
 	# Boss 打完,清掉「从某阶段继续」的进度
 	var progress := get_node_or_null("/root/BossProgress")
 	if progress != null:
 		progress.call("clear")
 	if _npc != null and _npc.has_method("stop_revive"):
 		_npc.call("stop_revive")
-	var ending := BUG_ENDING.instantiate()
-	add_child(ending)
+	if _fade != null:
+		var tw := create_tween()
+		tw.tween_property(_fade, "color:a", 1.0, 1.0)
+		await get_tree().create_timer(1.1).timeout
+	get_tree().change_scene_to_file(WHALE_BRIEFING)
 
 
 ## 衍月复活(倒地 2 秒后)时才弹出对应台词;最后一次复活后,台词念完再给手枪提示。
