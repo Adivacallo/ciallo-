@@ -50,6 +50,23 @@ const FIREBALL_MIN_PHASE := 4
 const FIREBALL_SHOTS := 5
 const FIREBALL_GAP := 0.35
 const FIREBALL_DAMAGE := 8
+## 第 5 阶段:阶段开始时召唤 1 个分身,之后每 60 秒再召唤 1 个,最多 3 个。
+## 分身的血量倍率(1.0 = 和本体完全一样)
+const CLONE_MIN_PHASE := 4
+const CLONE_INTERVAL := 60.0
+const CLONE_MAX := 3
+const CLONE_HP_FACTOR := 0.3
+const CLONE_SCENE_PATH := "res://levels/enemies/wizard_boss.tscn"
+## 第 3 阶段起:阶段开始时召唤 1 个骑士,之后每 20 秒 1 个(场上最多 6 个)
+const KNIGHT := preload("res://levels/enemies/knight.tscn")
+const KNIGHT_MIN_PHASE := 2
+const KNIGHT_INTERVAL := 20.0
+const KNIGHT_MAX_ALIVE := 6
+## 第 4 阶段起:阶段开始时召唤 1 个飞行法师,之后每 40 秒 1 个(场上最多 4 个)
+const FLYING_WIZARD := preload("res://levels/enemies/wizard_minion.tscn")
+const WIZARD_MIN_PHASE := 3
+const WIZARD_INTERVAL := 40.0
+const WIZARD_MAX_ALIVE := 4
 
 ## 第 1 阶段的血量(之后每阶段 ×PHASE_HP_FACTOR)。
 @export var base_health := 300
@@ -63,6 +80,15 @@ var _active := false
 var _dead := false
 var _revive_locked := false
 var _health := 300
+## 是否是本体召唤出来的分身(分身不再召唤分身、死亡不复活)
+var is_clone := false
+## 分身召唤倒计时 / 已召唤数量
+var _clone_cd := CLONE_INTERVAL
+var _clones_made := 0
+## 骑士召唤倒计时
+var _knight_cd := KNIGHT_INTERVAL
+## 飞行法师召唤倒计时
+var _wizard_cd := WIZARD_INTERVAL
 ## 当前阶段的最大血量(_apply_phase_stats 刷新,boss_bar 读这个值)。
 var max_health := 300
 ## 0 = 第 1 阶段。
@@ -139,6 +165,54 @@ func become_hostile() -> void:
 	_body.modulate = Color.WHITE
 	_body.scale = BODY_SCALE
 	_play(&"fly", true)
+	# 第 5 阶段开始:先立刻来一个分身,之后每 60 秒一个
+	if _can_clone():
+		_clone_cd = CLONE_INTERVAL
+		_spawn_clone()
+	# 第 3 阶段开始:先立刻来一个骑士,之后每 20 秒一个
+	if _can_summon_knight():
+		_knight_cd = KNIGHT_INTERVAL
+		_summon_knight()
+	# 第 4 阶段开始:先立刻来一个飞行法师,之后每 40 秒一个
+	if _can_summon_wizard():
+		_wizard_cd = WIZARD_INTERVAL
+		_summon_wizard()
+
+
+## 只有本体在第 5 阶段及以后才召唤分身,且最多 CLONE_MAX 个。
+func _can_clone() -> bool:
+	return not is_clone and _phase >= CLONE_MIN_PHASE and _clones_made < CLONE_MAX
+
+
+## 召唤一个和自己一样(外观 / 招式 / 阶段)的分身。
+func _spawn_clone() -> void:
+	if not _can_clone():
+		return
+	var packed := load(CLONE_SCENE_PATH) as PackedScene
+	if packed == null:
+		return
+	var host := get_parent()
+	if host == null:
+		return
+	var clone := packed.instantiate()
+	if clone == null:
+		return
+	_clones_made += 1
+	clone.set("is_clone", true)
+	clone.set("base_health", maxi(1, int(round(float(base_health) * CLONE_HP_FACTOR))))
+	clone.set("_phase", _phase)
+	clone.set("hover_y", hover_y)
+	host.add_child(clone)
+	# 三个分身分别站在场地左 / 中 / 右,不会叠在一起
+	var anchors := [0.28, 0.5, 0.72]
+	var index := clampi(_clones_made - 1, 0, anchors.size() - 1)
+	var x := lerpf(ROOM_MIN_X + 60.0, ROOM_MAX_X - 60.0, float(anchors[index]))
+	clone.global_position = Vector2(x, global_position.y)
+	clone.call("become_hostile")
+	clone.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(clone, "modulate:a", 1.0, 0.4)
+	_flash_body(Color(0.6, 0.9, 1.0))
 	modulate.a = 1.0
 
 
@@ -191,6 +265,94 @@ func _physics_process(delta: float) -> void:
 		if _explosion_cd <= 0.0:
 			_explosion_cd = EXPLOSION_INTERVAL
 			_cast_space_explosion()
+	# 第 5 阶段起:每 60 秒召唤一个分身(开局那一个在 become_hostile 里放)
+	if _can_clone():
+		_clone_cd -= delta
+		if _clone_cd <= 0.0:
+			_clone_cd = CLONE_INTERVAL
+			_spawn_clone()
+	# 第 3 阶段起:每 20 秒召唤一个骑士
+	if _can_summon_knight():
+		_knight_cd -= delta
+		if _knight_cd <= 0.0:
+			_knight_cd = KNIGHT_INTERVAL
+			_summon_knight()
+	# 第 4 阶段起:每 40 秒召唤一个飞行法师
+	if _can_summon_wizard():
+		_wizard_cd -= delta
+		if _wizard_cd <= 0.0:
+			_wizard_cd = WIZARD_INTERVAL
+			_summon_wizard()
+
+
+## 只有本体在第 3 阶段及以后才召唤骑士。
+func _can_summon_knight() -> bool:
+	return not is_clone and _phase >= KNIGHT_MIN_PHASE
+
+
+## 从远离主角的一侧放一个骑士进场。
+func _summon_knight() -> void:
+	if _knights_alive() >= KNIGHT_MAX_ALIVE:
+		return
+	var host := get_parent()
+	if host == null:
+		return
+	var knight := KNIGHT.instantiate()
+	if knight == null:
+		return
+	host.add_child(knight)
+	var from_left := true
+	if _player != null and is_instance_valid(_player):
+		from_left = _player.global_position.x > ROOM_CENTER_X
+	var x := ROOM_MIN_X + 40.0 if from_left else ROOM_MAX_X - 40.0
+	knight.global_position = Vector2(x, GROUND_Y)
+	if knight.has_method("set_move_dir"):
+		knight.call("set_move_dir", 1.0 if from_left else -1.0)
+	knight.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(knight, "modulate:a", 1.0, 0.35)
+	_flash_body(Color(0.9, 0.8, 0.6))
+
+
+func _knights_alive() -> int:
+	var n := 0
+	for node in get_tree().get_nodes_in_group("knight"):
+		if is_instance_valid(node):
+			n += 1
+	return n
+
+
+## 只有本体在第 4 阶段及以后才召唤飞行法师。
+func _can_summon_wizard() -> bool:
+	return not is_clone and _phase >= WIZARD_MIN_PHASE
+
+
+## 在场地空中随机位置放一个飞行法师。
+func _summon_wizard() -> void:
+	if _wizards_alive() >= WIZARD_MAX_ALIVE:
+		return
+	var host := get_parent()
+	if host == null:
+		return
+	var wizard := FLYING_WIZARD.instantiate()
+	if wizard == null:
+		return
+	host.add_child(wizard)
+	var x := randf_range(ROOM_MIN_X + 120.0, ROOM_MAX_X - 120.0)
+	var y := randf_range(240.0, 420.0)
+	wizard.global_position = Vector2(x, y)
+	wizard.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(wizard, "modulate:a", 1.0, 0.4)
+	_flash_body(Color(0.7, 0.8, 1.0))
+
+
+func _wizards_alive() -> int:
+	var n := 0
+	for node in get_tree().get_nodes_in_group("flying_wizard"):
+		if is_instance_valid(node):
+			n += 1
+	return n
 
 
 ## 场地随机位置引爆一颗空间爆炸(先预警,炸开时碰到掉 4 点血)。
@@ -412,6 +574,11 @@ func _defeat() -> void:
 	tw.tween_property(_body, "scale", Vector2(5.4, 5.4), 0.5)
 	tw.tween_property(self, "modulate:a", 0.0, 0.5)
 	await tw.finished
+	if is_clone:
+		# 分身不复活,打完就消失
+		defeated.emit()
+		queue_free()
+		return
 	_begin_revive()
 	defeated.emit()
 

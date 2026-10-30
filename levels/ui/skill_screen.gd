@@ -127,30 +127,38 @@ func _refresh_state() -> void:
 		var btn: Button = _buttons[key]
 		var state := String(stats.call("skill_state", key))
 		var label := String(stats.call("skill_label", key))
+		var cd := _cd_text(float(stats.call("skill_cd", key)))
 		if state != "locked":
 			unlocked_count += 1
 		match state:
 			"locked":
 				var cost := int(stats.call("skill_cost", key))
-				btn.text = "%s（解锁 %d token）" % [label, cost]
+				btn.text = "%s（%s · 解锁 %d token）" % [label, cd, cost]
 				btn.disabled = held < cost
 			"equipped":
 				carried += 1
 				var slot := int(stats.call("slot_of", key))
 				var slot_index := clampi(slot, 0, SLOT_NAMES.size() - 1)
-				btn.text = "%s（%s · %s）" % [
-					label, SLOT_NAMES[slot_index], SLOT_HOTKEYS[slot_index]]
+				btn.text = "%s（%s · %s · %s）" % [
+					label, cd, SLOT_NAMES[slot_index], SLOT_HOTKEYS[slot_index]]
 				btn.disabled = false
 			_:
 				if free_slot < 0:
-					btn.text = "%s（两个框都满了）" % label
+					btn.text = "%s（%s · 两个框都满了）" % [label, cd]
 					btn.disabled = true
 				else:
-					btn.text = "%s（点击装进%s）" % [label, SLOT_NAMES[free_slot]]
+					btn.text = "%s（%s · 点击装进%s）" % [label, cd, SLOT_NAMES[free_slot]]
 					btn.disabled = false
 
 	_state_label.text = "// 已解锁 %d / %d · 已携带 %d / 2 · 持有 %d token" % [
 		unlocked_count, _buttons.size(), carried, held]
+
+
+## 冷却显示:0 秒 = 无冷却。
+func _cd_text(seconds: float) -> String:
+	if seconds <= 0.0:
+		return "无冷却"
+	return "CD %d 秒" % int(round(seconds))
 
 
 func _flash(btn: Button) -> void:

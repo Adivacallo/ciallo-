@@ -7,12 +7,9 @@ const FLOOR_TILE := preload("res://levels/hazards/fire_room_ground.png")
 const BOSS_BAR_SCRIPT := preload("res://levels/ui/boss_bar.gd")
 const DIALOGUE_SCRIPT := preload("res://levels/ui/boss_dialogue.gd")
 const BG_BLUR := preload("res://shaders/bg_blur.gdshader")
-const VOID_SCENE := "res://levels/void_room.tscn"
 ## 打完最后一阶段 Boss 后先播鲸鱼娘的 galgame 式对白,再进黑房间
 const WHALE_BRIEFING := "res://levels/whale_briefing.tscn"
 const PLAYER_BASE_FRAMES := preload("res://player/red_frames.tres")
-const PLAYER_DEATH_FRAMES := preload("res://player/character/death_frames.tres")
-const PISTOL_BANG := preload("res://audio/explosions/grenade_bang.ogg")
 const BGM_PATH := "res://audio/music/level3.ogg"
 const BGM_DB := -8.0
 const GROUND_Y := 600.0
@@ -54,9 +51,6 @@ var _bg: TextureRect
 var _bg_mat: ShaderMaterial
 var _music: AudioStreamPlayer
 var _transitioning := false
-var _pistol_window := 0.0
-var _pistol_unlocked := false
-var _self_shot_done := false
 var _defeats := 0
 var _intro_done := false
 var _returning_home := false
@@ -82,8 +76,6 @@ func _process(delta: float) -> void:
 	# 背景切换期间持续震动
 	if _transitioning and _player != null:
 		_player.set("_shake", maxf(float(_player.get("_shake")), 0.9))
-	if _pistol_window > 0.0:
-		_pistol_window = maxf(0.0, _pistol_window - delta)
 
 
 ## 开场演出:衍月飘到右侧 → 身形蓝白闪烁几次 → 定住并进入敌对形态。
@@ -199,12 +191,9 @@ func _finish_run() -> void:
 	get_tree().change_scene_to_file(WHALE_BRIEFING)
 
 
-## 衍月复活(倒地 2 秒后)时才弹出对应台词;最后一次复活后,台词念完再给手枪提示。
+## 衍月复活(倒地 2 秒后)时才弹出对应台词。
 func _on_boss_revived() -> void:
 	_show_defeat_line()
-	if _defeats >= BOSS_REVIVES:
-		await get_tree().create_timer(2.2).timeout
-		_open_pistol_window()
 
 
 # ---------------------------------------------------------------- 手枪 / 死亡
@@ -233,83 +222,6 @@ func _on_player_died() -> void:
 		tw.tween_property(_fade, "color:a", 1.0, 0.9)
 		await get_tree().create_timer(1.0).timeout
 	get_tree().change_scene_to_file(FIRST_ROOM)
-
-
-func _revive_player() -> void:
-	var max_hp := int(_player.get("max_health"))
-	_player.set("state", 0)
-	_player.set("velocity", Vector2.ZERO)
-	_player.set("health", max_hp)
-	_player.set("_death_confirmed", false)
-	_player.set("_invuln_until", Time.get_ticks_msec() / 1000.0 + 1.2)
-	var sprite := _player.get_node_or_null("Sprite") as AnimatedSprite2D
-	if sprite != null:
-		sprite.sprite_frames = PLAYER_BASE_FRAMES
-		sprite.play(&"idle")
-	_player.emit_signal("health_changed", max_hp, max_hp)
-	if _player.global_position.y > 660.0:
-		_player.global_position = Vector2(420.0, 600.0)
-	_player.set("_shake", 0.0)
-	_open_pistol_window()
-
-
-## 头顶出现 3 秒字幕;字幕第一次出现后,Q 就一直有效(不再受 3 秒限制)。
-func _open_pistol_window() -> void:
-	if _self_shot_done:
-		return
-	_pistol_unlocked = true
-	_pistol_window = 3.0
-	if _dialogue != null:
-		_dialogue.call("show_line", "怀里的手枪似乎在震动\n[按 Q 举枪]", _player.global_position + Vector2(0, -150), 3.0)
-	print("[fire_room] 手枪已解锁:任何时候按 Q 都能自尽")
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if _self_shot_done or not _pistol_unlocked:
-		return
-	if event.is_action_pressed("switch_dimension"):
-		get_viewport().set_input_as_handled()
-		_play_self_shot()
-
-
-## 开枪自尽演出:举枪 → 枪口火光 → 枪响 → 倒地 → 淡出 → 进入全黑房间。
-func _play_self_shot() -> void:
-	if _self_shot_done:
-		return
-	_self_shot_done = true
-	_pistol_window = 0.0
-	print("[fire_room] 按 Q → 开枪自尽")
-	_player.process_mode = Node.PROCESS_MODE_DISABLED
-	var sprite := _player.get_node_or_null("Sprite") as AnimatedSprite2D
-	var gun := _player.get_node_or_null("Gun") as Sprite2D
-	var muzzle := _player.get_node_or_null("GunMuzzle") as Sprite2D
-	if gun != null:
-		gun.visible = true
-		gun.z_index = 20
-		gun.position = Vector2(2.0, -104.0)
-		gun.rotation = -PI * 0.5
-	if muzzle != null:
-		muzzle.visible = true
-		muzzle.z_index = 21
-		muzzle.position = Vector2(4.0, -136.0)
-		muzzle.rotation = 0.0
-	var sfx := AudioStreamPlayer.new()
-	sfx.stream = PISTOL_BANG
-	sfx.volume_db = -3.0
-	add_child(sfx)
-	sfx.play()
-	if sprite != null:
-		sprite.sprite_frames = PLAYER_DEATH_FRAMES
-		sprite.play(&"death")
-	await get_tree().create_timer(0.35).timeout
-	if muzzle != null:
-		muzzle.visible = false
-	await get_tree().create_timer(0.5).timeout
-	if _fade != null:
-		var tw := create_tween()
-		tw.tween_property(_fade, "color:a", 1.0, 0.7)
-		await tw.finished
-	get_tree().change_scene_to_file(VOID_SCENE)
 
 
 ## 背景切换演出:模糊 → 画面震动 → 全黑 → 换图 → 淡出黑场,共 2 秒。

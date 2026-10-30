@@ -38,6 +38,10 @@ const BLINK_MARGIN := 44.0
 const BLINK_COST := 10
 ## 闪现后的无敌时长
 const BLINK_INVULN := 0.6
+## 闪现掠过敌人的伤害 / 判定盒高度与两端余量
+const BLINK_DAMAGE := 10
+const BLINK_HIT_HEIGHT := 96.0
+const BLINK_HIT_PAD := 90.0
 
 var _heal_cd := 0.0
 var _blaze_cd := 0.0
@@ -71,6 +75,11 @@ func _scaled(base: int) -> int:
 	return maxi(1, int(round(float(base) * PlayerStats.skill_scale())))
 
 
+## 冷却按「技能冷却-20%」倍率缩短。
+func _cd(base: float) -> float:
+	return base * PlayerStats.cd_scale()
+
+
 ## 释放某个框(0 = 框一 / U,1 = 框二 / I)里装的技能。
 func _cast_slot(index: int, player: Node2D) -> void:
 	var key := PlayerStats.slot_skill(index)
@@ -99,7 +108,7 @@ func _cast_heal(player: Node2D) -> void:
 	var hp := int(player.get("health"))
 	if hp >= max_hp:
 		return
-	_heal_cd = HEAL_COOLDOWN
+	_heal_cd = _cd(HEAL_COOLDOWN)
 	var amount := int(round(float(max_hp) * HEAL_PERCENT * PlayerStats.skill_scale()))
 	var target := mini(max_hp, hp + amount)
 	player.set("health", target)
@@ -117,7 +126,7 @@ func _cast_blaze(player: Node2D) -> void:
 	var host := player.get_parent()
 	if host == null:
 		return
-	_blaze_cd = BLAZE_COOLDOWN
+	_blaze_cd = _cd(BLAZE_COOLDOWN)
 	_blazing = true
 	var facing := 1.0 if float(player.get("_facing")) >= 0.0 else -1.0
 	var gap := BLAZE_DURATION / float(BLAZE_SHOTS)
@@ -145,7 +154,7 @@ func _cast_tornado(player: Node2D) -> void:
 	var host := player.get_parent()
 	if host == null:
 		return
-	_tornado_cd = TORNADO_COOLDOWN
+	_tornado_cd = _cd(TORNADO_COOLDOWN)
 	var facing := 1.0 if float(player.get("_facing")) >= 0.0 else -1.0
 	if player.has_method("play_pose"):
 		player.call("play_pose", &"attack2", TORNADO_LOCK)
@@ -193,7 +202,40 @@ func _cast_blink(player: Node2D) -> void:
 	# 瞬移期间无敌
 	var now := float(player.call("_now"))
 	player.set("_invuln_until", maxf(float(player.get("_invuln_until")), now + BLINK_INVULN))
+	# 掠过路径上的敌人:每个 10 点伤害
+	_blink_strike(player, from, target)
 	_blink_fx(player, from, target)
+
+
+## 闪现路径上的敌人各吃一次 10 点伤害。
+func _blink_strike(player: Node2D, from: Vector2, to: Vector2) -> void:
+	var dmg := PlayerStats.hit(_scaled(BLINK_DAMAGE))
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(absf(to.x - from.x) + BLINK_HIT_PAD, BLINK_HIT_HEIGHT)
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = rect
+	query.transform = Transform2D(0.0, Vector2(
+		(from.x + to.x) * 0.5, player.global_position.y - 48.0))
+	query.collision_mask = 4
+	query.collide_with_areas = true
+	query.collide_with_bodies = false
+	var seen := {}
+	var dir := int(signf(to.x - from.x))
+	for hit in player.get_world_2d().direct_space_state.intersect_shape(query, 32):
+		var area := hit.get("collider") as Area2D
+		if area == null:
+			continue
+		var target = area.get_parent()
+		if target == null or not is_instance_valid(target):
+			continue
+		if not target.is_in_group("enemy") or not target.has_method("take_hit"):
+			continue
+		var id: int = target.get_instance_id()
+		if seen.has(id):
+			continue
+		seen[id] = true
+		# 延迟一帧结算:命中发生在物理查询刷新期间,直接改场景会报错
+		target.call_deferred("take_hit", dmg, dir, 240.0, -60.0)
 
 
 func _blink_fx(player: Node2D, from: Vector2, to: Vector2) -> void:
@@ -232,7 +274,7 @@ func _cast_feign(player: Node2D) -> void:
 		var pistol: Variant = scene.get("_pistol_unlocked")
 		if pistol != null and bool(pistol):
 			return
-	_feign_cd = FEIGN_COOLDOWN
+	_feign_cd = _cd(FEIGN_COOLDOWN)
 	player.call("feign_death")
 	_show_subtitle(player.global_position + Vector2(0.0, -152.0), FEIGN_LINE)
 

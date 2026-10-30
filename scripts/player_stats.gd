@@ -12,21 +12,23 @@ const UPGRADES := {
 	"invuln": {"step": 1.3, "max": 4, "costs": [24, 48, 96, 192]},
 	"parry": {"step": 1.3, "max": 4, "costs": [24, 48, 96, 192]},
 	"skill": {"step": 1.3, "max": 4, "costs": [24, 48, 96, 192]},
+	"cd": {"step": 0.8, "max": 4, "costs": [24, 48, 96, 192]},
 }
 
 ## 每条线已买的等级
-var levels := {"attack": 0, "health": 0, "invuln": 0, "parry": 0, "skill": 0}
+var levels := {"attack": 0, "health": 0, "invuln": 0, "parry": 0, "skill": 0, "cd": 0}
 
 ## 主动技能:每条 100 token 解锁;最多只能携带 2 个,
 ## 依次装进框一(按键 U)和框二(按键 I)。
 const SKILL_COST := 100
 const SKILL_SLOTS := 2
-## 技能表:加新技能往这里加一行就行(顺序 = 界面上列出的顺序)
+## 技能表:加新技能往这里加一行就行(顺序 = 界面上列出的顺序)。
+## cd = 冷却秒数,0 表示无冷却。
 const SKILLS := {
-	"heal": {"name": "回复", "label": "回复：立刻恢复 80% 血量", "cost": 100},
-	"blaze": {"name": "混沌爆炎", "label": "混沌爆炎：2 秒内 20 发火焰弹，每发 5", "cost": 100},
-	"tornado": {"name": "龙卷风", "label": "龙卷风：蓄力 2 秒无敌，横扫 3/4 场地（250）", "cost": 100},
-	"blink": {"name": "闪现", "label": "闪现：瞬移半个场地，每次 10 token，期间无敌", "cost": 50},
+	"heal": {"name": "回复", "label": "回复：立刻恢复 80% 血量", "cost": 100, "cd": 25.0},
+	"blaze": {"name": "混沌爆炎", "label": "混沌爆炎：2 秒内 20 发火焰弹，每发 5", "cost": 100, "cd": 30.0},
+	"tornado": {"name": "龙卷风", "label": "龙卷风：蓄力 2 秒无敌，横扫 3/4 场地（250）", "cost": 100, "cd": 30.0},
+	"blink": {"name": "闪现", "label": "闪现：瞬移半场，撞到敌人 10 伤害，10 token/次，期间无敌", "cost": 50, "cd": 0.0},
 }
 var skill_unlocked := {"heal": false, "blaze": false, "tornado": false, "blink": false}
 ## 已装配的技能(长度 2,空槽是空字符串)。框一 = U,框二 = I
@@ -101,6 +103,11 @@ func skill_name(key: String) -> String:
 ## 解锁这个技能要多少 token
 func skill_cost(key: String) -> int:
 	return int((SKILLS.get(key, {}) as Dictionary).get("cost", SKILL_COST))
+
+
+## 冷却秒数(0 = 无冷却)
+func skill_cd(key: String) -> float:
+	return float((SKILLS.get(key, {}) as Dictionary).get("cd", 0.0))
 
 
 ## 某个技能装在哪个框(0 = 框一,1 = 框二,-1 = 没装)
@@ -214,6 +221,11 @@ func parry_scale() -> float:
 ## 技能效果倍率(回复量 / 火焰弹伤害 / 龙卷风伤害)
 func skill_scale() -> float:
 	return multiplier("skill")
+
+
+## 技能冷却倍率(1.0 → 0.8 → 0.64 ...)
+func cd_scale() -> float:
+	return multiplier("cd")
 
 
 ## 清空成长(重新开档时用)。
