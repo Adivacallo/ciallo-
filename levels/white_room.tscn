@@ -1,10 +1,9 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://levels/white_room.gd" id="1_room"]
 [ext_resource type="PackedScene" path="res://player/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://levels/npc/scientist.tscn" id="3_npc"]
 [ext_resource type="Texture2D" path="res://levels/npc/console.png" id="4_console"]
-[ext_resource type="PackedScene" path="res://levels/hud.tscn" id="5_hud"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
 size = Vector2(1600, 160)
@@ -39,8 +38,6 @@ scale = Vector2(0.5, 0.5)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(220, 600)
-
-[node name="HUD" parent="." instance=ExtResource("5_hud")]
 
 [node name="Fade" type="CanvasLayer" parent="."]
 layer = 10

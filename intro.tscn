@@ -255,7 +255,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.64, 0.95, 1, 1)
 theme_override_fonts/font = SubResource("SystemFont_bold")
 theme_override_font_sizes/font_size = 22
-text = "大肥鱼"
+text = "鲸鱼娘"
 
 [node name="SpeakerRole" type="Label" parent="Dialog/Margin/Content/SpeakerRow"]
 layout_mode = 2
@@ -296,7 +296,7 @@ theme_override_constants/line_separation = 9
 theme_override_fonts/normal_font = SubResource("SystemFont_ui")
 theme_override_font_sizes/normal_font_size = 21
 bbcode_enabled = true
-text = "喂喂——能听到吗？我是大肥鱼，你的专属 Debug 导航员！"
+text = "喂喂——能听到吗？系统管理员！我是你的专属辅助者鲸鱼娘，现在整条应急频道就剩你和我了！"
 scroll_active = false
 visible_characters = 0
 

@@ -3,9 +3,8 @@
 [ext_resource type="PackedScene" path="res://intro.tscn" id="1_intro"]
 
 [node name="FinalBriefing" instance=ExtResource("1_intro")]
-custom_lines = PackedStringArray("这就是最后的[color=#ff6b8a]bug[/color]了，上吧！")
+custom_lines = PackedStringArray("这里的病毒根本杀不完嘛，先带着核心数据去安全区吧。", "前面就是安全区的必经之路了，看来病毒源也在那里。", "前面会很危险哦，一定要做好准备啊。")
 next_scene = "res://levels/fire_room.tscn"
-voice_paths = PackedStringArray("res://audio/voice/final_01.wav")
 portrait_source_path = "res://picture/dafeiyu_grin.png"
 loading_text = "> 正在进入火雨房间…"
 header_tag = "// FINAL BUG"

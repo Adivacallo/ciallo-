@@ -7,23 +7,24 @@ const MUSIC_TARGET_DB := -14.0
 const MUSIC_DUCK_DB := -26.0
 
 const LINES := [
-	"喂喂——能听到吗？我是[color=#8fe9ff]大肥鱼[/color]，你的专属 Debug 导航员！",
-	"别装没事啦，你开发的这个游戏，刚刚……全面 [color=#ff6b8a]BUG[/color] 暴走啦！",
-	"角色穿墙、Boss 血条倒着涨、存档说没就没，连主菜单都在偷偷报错。",
-	"作为作者，你得亲自进游戏里把 BUG 一个个修好；我呢，就负责在旁边给你报点、递工具、顺便吐槽。",
-	"前面就是进入游戏世界的入口。穿过它，一关一关打过去，把跑偏的代码掰回正轨！",
-	"准备完毕——3、2、1！[color=#ff6b8a]BUG 修复大作战[/color]，开始！",
+	"喂喂——能听到吗？[color=#8fe9ff]系统管理员[/color]！我是你的专属辅助者[color=#8fe9ff]鲸鱼娘[/color]，现在整条应急频道就剩你和我了！",
+	"别愣着啦——有不明 [color=#ff6b8a]病毒[/color] 突破了外层防火墙，正在往系统内核里钻！",
+	"核心数据就锁在内核最深处，一旦被它们啃穿，整个系统都会跟着一起崩掉。",
+	"我现在被堵在数据舱这一侧，你先赶过来跟我汇合，我们一起把核心数据守住。",
+	"路上那些被感染的进程不会乖乖让路，边打边清，一步都别让病毒靠近核心。",
+	"准备好了吗？——3、2、1！[color=#ff6b8a]核心守护行动[/color]，开始！",
 ]
 
 ## 自定义简报：留空时使用开场六句；最终战简报只覆盖一句。
 @export var custom_lines: PackedStringArray = []
 @export var next_scene := "res://levels/game.tscn"
-@export var voice_enabled := true
-## 留空时按开场命名读取 intro_01..06.wav；自定义简报可逐句指定音频。
+## 语音资源已删除,默认关闭;以后要加语音把这里改回 true 并放回 intro_01..06.wav。
+@export var voice_enabled := false
+## 语音资源已全部移除;留空时按 intro_01..06.wav 探测,文件不存在就静音。
 @export var voice_paths: PackedStringArray = []
 @export var portrait_texture: Texture2D
 @export var portrait_source_path := "res://picture/dafeiyu.png"
-## 说话人名字(留空 = 用场景里原本的「大肥鱼」)
+## 说话人名字(留空 = 用场景里原本的「鲸鱼娘」)
 @export var speaker_name := ""
 ## 每句的说话人(留空的那句沿用 speaker_name)
 @export var speaker_names: PackedStringArray = []
@@ -115,6 +116,8 @@ func _load_voice(index: int) -> AudioStream:
 		path = voice_paths[index]
 	else:
 		path = VOICE_DIR + "intro_%02d.wav" % (index + 1)
+	if not ResourceLoader.exists(path) and not FileAccess.file_exists(path):
+		return null
 	var stream: AudioStream = null
 	if ResourceLoader.exists(path):
 		stream = load(path) as AudioStream

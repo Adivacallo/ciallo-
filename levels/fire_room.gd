@@ -5,10 +5,9 @@ extends Node2D
 
 const FLOOR_TILE := preload("res://levels/hazards/fire_room_ground.png")
 const BOSS_BAR_SCRIPT := preload("res://levels/ui/boss_bar.gd")
-const DIALOGUE_SCRIPT := preload("res://levels/ui/boss_dialogue.gd")
 const BG_BLUR := preload("res://shaders/bg_blur.gdshader")
-## 打完最后一阶段 Boss 后先播鲸鱼娘的 galgame 式对白,再进黑房间
-const WHALE_BRIEFING := "res://levels/whale_briefing.tscn"
+## 打完最后一阶段 Boss 后直接进入黑房间(终幕对白放在全白房间)
+const VOID_ROOM := "res://levels/void_room.tscn"
 const PLAYER_BASE_FRAMES := preload("res://player/red_frames.tres")
 const BGM_PATH := "res://audio/music/level3.ogg"
 const BGM_DB := -8.0
@@ -34,18 +33,12 @@ const FINAL_DEFEAT := BOSS_REVIVES + 1
 const TOKENS_PER_PHASE := [200, 400, 800, 1200, 1600]
 ## 死亡后退回的第一房间
 const FIRST_ROOM := "res://levels/game.tscn"
-const DEFEAT_LINES := [
-	"在平行时空穿越的你，是无法击败操控平行时空的我的",
-	"我可以输无数次，而你一次都不行",
-]
-const REPEAT_LINES := ["放弃吧", "可笑", "没用的"]
 
 @onready var _player: Node2D = $Player
 @onready var _npc: Node2D = $WizardBoss
 
 var _fade: ColorRect
 var _boss_bar: Node
-var _dialogue: Node
 var _sky: ColorRect
 var _bg: TextureRect
 var _bg_mat: ShaderMaterial
@@ -64,7 +57,6 @@ func _ready() -> void:
 	_sky = _ensure_sky()
 	_ensure_background()
 	_boss_bar = _ensure_boss_bar()
-	_dialogue = _ensure_dialogue()
 	_setup_camera()
 	_ensure_music()
 	_setup_death_handling.call_deferred()
@@ -104,11 +96,9 @@ func _play_intro() -> void:
 	if _npc.has_method("become_hostile"):
 		_npc.call("become_hostile")
 	if _boss_bar != null and _boss_bar.has_method("bind"):
-		_boss_bar.call("bind", _npc, "豆包")
+		_boss_bar.call("bind", _npc, "衍月")
 	if not _npc.is_connected("defeated", _on_boss_defeated):
 		_npc.connect("defeated", _on_boss_defeated)
-	if not _npc.is_connected("revived", _on_boss_revived):
-		_npc.connect("revived", _on_boss_revived)
 
 
 ## 从上次死亡的阶段继续:跳过开场演出,Boss 直接以该阶段的状态开战。
@@ -123,14 +113,12 @@ func _resume_phase(phase: int) -> void:
 		_npc.call("become_hostile")
 	_apply_background_now(_defeats)
 	if _boss_bar != null and _boss_bar.has_method("bind"):
-		_boss_bar.call("bind", _npc, "豆包")
+		_boss_bar.call("bind", _npc, "衍月")
 	if not _npc.is_connected("defeated", _on_boss_defeated):
 		_npc.connect("defeated", _on_boss_defeated)
-	if not _npc.is_connected("revived", _on_boss_revived):
-		_npc.connect("revived", _on_boss_revived)
 
 
-## 击败豆包:前 BOSS_REVIVES 次回满血量 + 换背景并复活;最后一次直接进全黑房间。
+## 击败衍月:前 BOSS_REVIVES 次回满血量 + 换背景并复活;最后一次直接进全黑房间。
 func _on_boss_defeated() -> void:
 	_defeats += 1
 	_award_tokens(_defeats)
@@ -188,12 +176,7 @@ func _finish_run() -> void:
 		var tw := create_tween()
 		tw.tween_property(_fade, "color:a", 1.0, 1.0)
 		await get_tree().create_timer(1.1).timeout
-	get_tree().change_scene_to_file(WHALE_BRIEFING)
-
-
-## 衍月复活(倒地 2 秒后)时才弹出对应台词。
-func _on_boss_revived() -> void:
-	_show_defeat_line()
+	get_tree().change_scene_to_file(VOID_ROOM)
 
 
 # ---------------------------------------------------------------- 手枪 / 死亡
@@ -268,17 +251,6 @@ func _apply_background_now(index: int) -> void:
 		_bg.texture = tex
 
 
-func _show_defeat_line() -> void:
-	if _dialogue == null:
-		return
-	var text := ""
-	if _defeats <= DEFEAT_LINES.size():
-		text = DEFEAT_LINES[_defeats - 1]
-	else:
-		text = REPEAT_LINES[randi() % REPEAT_LINES.size()]
-	_dialogue.call("show_line", text, _npc.global_position + Vector2(0, -168))
-
-
 # ---------------------------------------------------------------- 运行时兜底构建
 
 func _ensure_node2d(node_name: String) -> Node2D:
@@ -346,18 +318,6 @@ func _ensure_boss_bar() -> Node:
 	layer.name = "BossBar"
 	layer.layer = 3
 	layer.set_script(BOSS_BAR_SCRIPT)
-	add_child(layer)
-	return layer
-
-
-func _ensure_dialogue() -> Node:
-	var node := get_node_or_null("Dialogue")
-	if node != null:
-		return node
-	var layer := CanvasLayer.new()
-	layer.name = "Dialogue"
-	layer.layer = 4
-	layer.set_script(DIALOGUE_SCRIPT)
 	add_child(layer)
 	return layer
 

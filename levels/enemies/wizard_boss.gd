@@ -1,5 +1,5 @@
 extends Node2D
-## 火雨房间 Boss「豆包」的飞行真身。
+## 火雨房间 Boss「衍月」的飞行真身。
 ## 悬浮在场地右侧，按「火柱 → 雷击 → 潮汐」循环施放技能。
 
 signal health_changed(current: int, maximum: int)

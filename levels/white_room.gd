@@ -1,87 +1,69 @@
 extends Node2D
-## 全白房间:仪器前的研究员。三句台词播完才开打,被打倒后留下最后一句话并淡出。
+## 全白房间:最终幕。程序猿已是友方,不可攻击;豆包已从剧情中删除。
+## 五句「守望」对白播完后,自动显示任务成功并回到主菜单。
 
-const DIALOGUE_SCRIPT := preload("res://levels/ui/boss_dialogue.gd")
-const BOSS_BAR_SCRIPT := preload("res://levels/ui/boss_bar.gd")
-const CORE_ORB := preload("res://levels/goal/core_orb.tscn")
+const VN_SCENE := preload("res://intro.tscn")
 const MAIN_MENU := "res://main.tscn"
 const ROOM_SIZE := Vector2(1152, 648)
-## 光球生成在仪器(700,600,0.75 倍)右侧的水平位置。
-const ORB_POSITION := Vector2(892.0, 566.0)
-const ENDING_WHITE := "已获取BUG源"
-const ENDING_YELLOW := "任务完成"
+
+## 终幕对白:病毒没有清除,但守望还在继续。
 const LINES := [
-	"终于让豆包帮我完成游戏的修改了……",
-	"嗯。。。你是谁？怎么来到这里的",
-	"豆包，豆包，我该怎么办？",
-	"我以最直白，最不绕弯子的方式告诉你，你可以轻松击败入侵者，可以直接上。",
+	"核心数据保住了……可外面的病毒还在，这不算赢吧？",
+	"当然不算赢，但也不算输呀——第一阶段，守住了。",
+	"那接下来呢？",
+	"接下来就继续守。病毒清不完，守望就不会停。",
+	"好了，管理员——内核交给程序猿，外面的病毒我们继续盯着。守望，继续。",
 ]
-## 每句的说话人(和 LINES 一一对应)
-const SPEAKERS := ["程序猿", "程序猿", "程序猿", "豆包"]
-## 每句的立绘:程序猿用他本人的像素头像,豆包用对话框那头像
+const SPEAKERS := ["程序猿", "鲸鱼娘", "程序猿", "鲸鱼娘", "鲸鱼娘"]
 const PORTRAIT_AUTHOR := "res://levels/npc/scientist.png"
-const PORTRAIT_DOUBAO := "res://picture/programmer.png"
-const PORTRAITS := [PORTRAIT_AUTHOR, PORTRAIT_AUTHOR, PORTRAIT_AUTHOR, PORTRAIT_DOUBAO]
-const VN_SCENE := preload("res://intro.tscn")
-## 被打倒后的对白
-const DEATH_LINES := [
-	"呃啊。。。",
-	"对不起是我搞错了，这次我直接跟你说100%大实话，你根本不是她的对手。",
+const PORTRAIT_WHALE := "res://picture/dafeiyu.png"
+const PORTRAITS := [
+	PORTRAIT_AUTHOR, PORTRAIT_WHALE, PORTRAIT_AUTHOR, PORTRAIT_WHALE, PORTRAIT_WHALE,
 ]
-const DEATH_SPEAKERS := ["程序猿", "豆包"]
-const DEATH_PORTRAITS := [PORTRAIT_AUTHOR, PORTRAIT_DOUBAO]
+
+const RESULT_MAIN := "核心数据保卫成功"
+const RESULT_SUB := "第一阶段任务成功"
 
 @onready var _player: Node2D = $Player
 @onready var _npc: Node2D = $Scientist
 
-var _dialogue: Node
-var _bar: Node
 var _fade: ColorRect
-var _orb: Node2D
-var _ending := false
 
 
 func _ready() -> void:
 	_setup_camera()
-	_dialogue = _ensure_dialogue()
-	_bar = _ensure_bar()
 	_fade = get_node_or_null("Fade/Rect") as ColorRect
 	if _fade == null:
 		_fade = _make_fade()
 	_fade.color = Color(0, 0, 0, 1)
 	var tw := create_tween()
 	tw.tween_property(_fade, "color:a", 0.0, 0.8)
-	if not _npc.is_connected("defeated", _on_npc_defeated):
-		_npc.connect("defeated", _on_npc_defeated)
-	_run_intro.call_deferred()
+	_run_finale.call_deferred()
 
 
-## 进场演出:锁定操作 → 研究员转向 → galgame 式对白(四句) → 开打。
-func _run_intro() -> void:
+## 进场:锁定操作 → 程序猿转向 → 五句对白 → 任务成功。
+func _run_finale() -> void:
 	await get_tree().create_timer(0.8).timeout
 	_player.process_mode = Node.PROCESS_MODE_DISABLED
-	_npc.call("start_talk")
-	_npc.call("face_player")
+	if _npc != null and is_instance_valid(_npc):
+		_npc.call("face_player")
+		_npc.call("start_talk")
 	await get_tree().create_timer(0.3).timeout
 	await _play_vn()
-	_player.process_mode = Node.PROCESS_MODE_INHERIT
-	_npc.call("start_fight")
-	if _bar != null and _bar.has_method("bind"):
-		_bar.call("bind", _npc, "研究员")
+	_play_result()
 
 
-## 用和黑房间同一套 galgame 界面播白房间的对白(浮层,不切场景)。
-func _play_vn(lines: Array = LINES, speakers: Array = SPEAKERS,
-		portraits: Array = PORTRAITS, loading := "> 战斗开始") -> void:
+## 用开场简报那套 galgame 界面播放终幕对白(浮层,不切场景)。
+func _play_vn() -> void:
 	var vn := VN_SCENE.instantiate()
-	vn.set("custom_lines", PackedStringArray(lines))
-	vn.set("speaker_names", PackedStringArray(speakers))
-	vn.set("portrait_paths", PackedStringArray(portraits))
+	vn.set("custom_lines", PackedStringArray(LINES))
+	vn.set("speaker_names", PackedStringArray(SPEAKERS))
+	vn.set("portrait_paths", PackedStringArray(PORTRAITS))
 	vn.set("voice_enabled", false)
 	vn.set("stay_in_scene", true)
-	vn.set("portrait_source_path", String(portraits[0]) if portraits.size() > 0 else PORTRAIT_AUTHOR)
-	vn.set("header_tag", "// AUTHOR")
-	vn.set("loading_text", loading)
+	vn.set("portrait_source_path", String(PORTRAITS[0]))
+	vn.set("header_tag", "// WATCH")
+	vn.set("loading_text", "> 任务完成")
 	var layer := CanvasLayer.new()
 	layer.name = "VN"
 	layer.layer = 30
@@ -92,44 +74,12 @@ func _play_vn(lines: Array = LINES, speakers: Array = SPEAKERS,
 		layer.queue_free()
 
 
-## 打倒研究员:再来一段对白,然后他淡出、留下BUG源。
-func _on_npc_defeated() -> void:
-	if _npc == null or not is_instance_valid(_npc):
-		_spawn_core_orb()
-		return
-	if _player != null:
-		_player.process_mode = Node.PROCESS_MODE_DISABLED
-	await _play_vn(DEATH_LINES, DEATH_SPEAKERS, DEATH_PORTRAITS, "> 战斗结束")
-	if _player != null:
-		_player.process_mode = Node.PROCESS_MODE_INHERIT
-	_npc.call("fade_out", 2.0)
-	_spawn_core_orb()
-
-
-## 研究员倒下后,在仪器右侧生成BUG源光球。
-func _spawn_core_orb() -> void:
-	if _orb != null or _ending:
-		return
-	_orb = CORE_ORB.instantiate()
-	_orb.position = ORB_POSITION
-	add_child(_orb)
-	if _orb.has_signal("collected") and not _orb.is_connected("collected", _on_core_collected):
-		_orb.connect("collected", _on_core_collected)
-
-
-func _on_core_collected() -> void:
-	if _ending:
-		return
-	_ending = true
-	_play_ending()
-
-
-## 结束演出:黑屏 → 白字「已获取BUG源」2 秒 → 黄字「任务完成」→ 回主菜单。
-func _play_ending() -> void:
-	if _player != null and is_instance_valid(_player):
-		_player.process_mode = Node.PROCESS_MODE_DISABLED
+## 结局:黑场中依次浮出「核心数据保卫成功」「第一阶段任务成功」,随后回主菜单。
+func _play_result() -> void:
+	# 对白结束时 VN 已淡到黑,这里直接把房间黑场补上,避免闪一下白房间。
+	_fade.color.a = 1.0
 	var layer := CanvasLayer.new()
-	layer.name = "Ending"
+	layer.name = "Result"
 	layer.layer = 20
 	add_child(layer)
 	var font := SystemFont.new()
@@ -138,42 +88,38 @@ func _play_ending() -> void:
 		"Noto Sans CJK SC", "PingFang SC", "SimHei",
 	])
 
-	var white := Label.new()
-	white.text = ENDING_WHITE
-	white.add_theme_font_override("font", font)
-	white.add_theme_font_size_override("font_size", 40)
-	white.add_theme_color_override("font_color", Color(1, 1, 1, 1))
-	white.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	white.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	white.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	white.modulate.a = 0.0
-	layer.add_child(white)
+	var main_label := Label.new()
+	main_label.text = RESULT_MAIN
+	main_label.add_theme_font_override("font", font)
+	main_label.add_theme_font_size_override("font_size", 40)
+	main_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	main_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	main_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	main_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	main_label.modulate.a = 0.0
+	layer.add_child(main_label)
 
-	var yellow := Label.new()
-	yellow.text = ENDING_YELLOW
-	yellow.add_theme_font_override("font", font)
-	yellow.add_theme_font_size_override("font_size", 30)
-	yellow.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25, 1))
-	yellow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	yellow.offset_top = 96.0
-	yellow.offset_bottom = 96.0
-	yellow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	yellow.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	yellow.visible = false
-	layer.add_child(yellow)
+	var sub_label := Label.new()
+	sub_label.text = RESULT_SUB
+	sub_label.add_theme_font_override("font", font)
+	sub_label.add_theme_font_size_override("font_size", 30)
+	sub_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25, 1))
+	sub_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	sub_label.offset_top = 96.0
+	sub_label.offset_bottom = 96.0
+	sub_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	sub_label.visible = false
+	layer.add_child(sub_label)
 
-	if _fade != null:
-		var fade := create_tween()
-		fade.tween_property(_fade, "color:a", 1.0, 0.7)
-		await fade.finished
-	var show_white := create_tween()
-	show_white.tween_property(white, "modulate:a", 1.0, 0.45)
-	await show_white.finished
-	await get_tree().create_timer(2.0).timeout
-	yellow.visible = true
-	var show_yellow := create_tween()
-	show_yellow.tween_property(yellow, "modulate:a", 1.0, 0.4).from(0.0)
-	await show_yellow.finished
+	var show_main := create_tween()
+	show_main.tween_property(main_label, "modulate:a", 1.0, 0.45)
+	await show_main.finished
+	await get_tree().create_timer(1.4).timeout
+	sub_label.visible = true
+	var show_sub := create_tween()
+	show_sub.tween_property(sub_label, "modulate:a", 1.0, 0.4).from(0.0)
+	await show_sub.finished
 	await get_tree().create_timer(1.8).timeout
 	get_tree().change_scene_to_file(MAIN_MENU)
 
@@ -186,30 +132,6 @@ func _setup_camera() -> void:
 	cam.limit_top = 16
 	cam.limit_right = int(ROOM_SIZE.x)
 	cam.limit_bottom = 16 + int(ROOM_SIZE.y)
-
-
-func _ensure_dialogue() -> Node:
-	var node := get_node_or_null("Dialogue")
-	if node != null:
-		return node
-	var layer := CanvasLayer.new()
-	layer.name = "Dialogue"
-	layer.layer = 4
-	layer.set_script(DIALOGUE_SCRIPT)
-	add_child(layer)
-	return layer
-
-
-func _ensure_bar() -> Node:
-	var bar := get_node_or_null("BossBar")
-	if bar != null:
-		return bar
-	var layer := CanvasLayer.new()
-	layer.name = "BossBar"
-	layer.layer = 3
-	layer.set_script(BOSS_BAR_SCRIPT)
-	add_child(layer)
-	return layer
 
 
 func _make_fade() -> ColorRect:
