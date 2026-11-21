@@ -723,17 +723,17 @@ metadata/_tc_uuid = "3051979003088036441"
 
 [node name="Title" type="RichTextLabel" parent="TitleBlock" unique_id=1364519544]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 74)
+custom_minimum_size = Vector2(0, 92)
 layout_mode = 2
 theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.3, 0.85, 1, 0.6)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
 theme_override_constants/shadow_offset_y = 3
-theme_override_constants/outline_size = 10
+theme_override_constants/outline_size = 12
 theme_override_fonts/normal_font = SubResource("SystemFont_bold")
-theme_override_font_sizes/normal_font_size = 42
+theme_override_font_sizes/normal_font_size = 56
 bbcode_enabled = true
-text = "[center][color=#ff3366]BUG[/color]  [color=#00ffff]修复大作战[/color][/center]"
+text = "[center][color=#ff3366]不灭[/color]  [color=#00ffff]守望[/color][/center]"
 fit_content = true
 scroll_active = false
 metadata/_tc_uuid = "1361665459351364390"
@@ -745,7 +745,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
 theme_override_constants/shadow_offset_y = 2
 theme_override_fonts/font = SubResource("SystemFont_ui")
 theme_override_font_sizes/font_size = 21
-text = "维度修复局 · BUG 清除行动"
+text = "维度执法局 · 核心守望行动"
 horizontal_alignment = 1
 metadata/_tc_uuid = "1533667041103094769"
 
@@ -754,7 +754,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.62, 0.68, 0.88, 0.95)
 theme_override_fonts/font = SubResource("SystemFont_ui")
 theme_override_font_sizes/font_size = 15
-text = "一场必须亲手打完的 BUG 战争。"
+text = "病毒未清，守望不止。"
 horizontal_alignment = 1
 autowrap_mode = 2
 metadata/_tc_uuid = "8917326063400228376"

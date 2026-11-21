@@ -168,14 +168,14 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.37, 0.55, 1)
 theme_override_fonts/font = SubResource("SystemFont_bold")
 theme_override_font_sizes/font_size = 16
-text = "BUG"
+text = "不灭"
 
 [node name="BrandName" type="Label" parent="Brand"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.92, 1, 1)
 theme_override_fonts/font = SubResource("SystemFont_bold")
 theme_override_font_sizes/font_size = 16
-text = "修复大作战"
+text = "守望"
 
 [node name="BrandSub" type="Label" parent="Brand"]
 layout_mode = 2
